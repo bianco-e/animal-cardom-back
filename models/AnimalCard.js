@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const AnimalCardSchema = new mongoose.Schema(
   {
+    created_at: Date,
     name: String,
     species: String,
     image: String,
