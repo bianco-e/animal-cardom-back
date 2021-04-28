@@ -87,12 +87,14 @@ router.post("/games/save-game", (req, res) => {
     { new: true, upsert: true }
   ).exec((err, gameDoc) => {
     if (err) return console.error(err);
-    User.findOneAndUpdate({ auth_id }, { $inc: { xp: xp_earned } }).exec(
-      (err, userDoc) => {
-        if (err) return console.error(err);
-        defaultOkResponse(res, { xp: userDoc.xp + xp_earned });
-      }
-    );
+    User.findOneAndUpdate(
+      { auth_id },
+      { $inc: { xp: xp_earned } },
+      { new: true }
+    ).exec((err, userDoc) => {
+      if (err) return console.error(err);
+      defaultOkResponse(res, { xp: userDoc.xp });
+    });
   });
 });
 

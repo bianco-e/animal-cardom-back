@@ -32,4 +32,16 @@ router.post("/users/profile", (req, res) => {
   });
 });
 
+router.post("/users/hand/update", (req, res) => {
+  const { auth_id, hand } = req.body;
+  const query = User.findOneAndUpdate({ auth_id }, { hand }, { new: true });
+  query.exec((err, doc) => {
+    if (err) return console.error(`Error updating user hand: ${err}`);
+    if (doc) {
+      defaultOkResponse(res, doc.hand);
+    } else
+      defaultErrorResponse(res, "Error updating user hand", "hand_not_updated");
+  });
+});
+
 module.exports = router;
