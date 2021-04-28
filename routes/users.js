@@ -16,27 +16,16 @@ router.post("/users/me", (req, res) => {
   User.findOne({ auth_id }, (err, doc) => {
     if (err) return console.error(`Error getting user data: ${err}`);
     if (doc) {
-      defaultOkResponse(res, { user: doc });
+      defaultOkResponse(res, doc);
     } else defaultErrorResponse(res, "User not found", "user_not_found");
   });
 });
 
 router.post("/users/profile", (req, res) => {
   const { auth_id } = req.body;
-  const query = User.findOne({ auth_id }).select("profile");
+  const query = User.findOne({ auth_id }).select(["xp", "owned_cards", "hand"]);
   query.exec((err, doc) => {
     if (err) return console.error(`Error getting user profile: ${err}`);
-    if (doc) {
-      defaultOkResponse(res, doc);
-    } else defaultErrorResponse(res, "User not found", "user_not_found");
-  });
-});
-
-router.post("/users/collection", (req, res) => {
-  const { auth_id } = req.body;
-  const query = User.findOne({ auth_id }).select("owned_cards");
-  query.exec((err, doc) => {
-    if (err) return console.error(`Error getting user collection: ${err}`);
     if (doc) {
       defaultOkResponse(res, doc);
     } else defaultErrorResponse(res, "User not found", "user_not_found");

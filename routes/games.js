@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const AnimalCard = require("../models/AnimalCard");
 const PlantCard = require("../models/PlantCard");
+const User = require("../models/User");
 const { GameModel: Game } = require("../models/Game");
 const { defaultOkResponse } = require("../utils");
 const { campaignPcAnimals } = require("../utils/constants");
@@ -38,14 +39,14 @@ router.get("/games/new-random", (req, res) => {
 
 //refactor this query
 router.get("/games/new-campaign", (req, res) => {
-  const { level, user_cards } = req.query;
+  const { xp, user_cards } = req.query;
   const userCards = user_cards.split(";");
   PlantCard.aggregate([{ $sample: { size: 6 } }]).exec(
     (plantsErr, plantsDocs) => {
       if (plantsErr)
         return console.error("Error getting random initial plants", plantsErr);
       AnimalCard.find({
-        name: { $in: campaignPcAnimals[level] },
+        name: { $in: campaignPcAnimals[xp] },
       }).exec((pcAnimalsErr, pcAnimals) => {
         if (pcAnimalsErr)
           return console.error(
@@ -79,23 +80,33 @@ router.get("/games/new-campaign", (req, res) => {
 
 router.post("/games/save-game", (req, res) => {
   const { game, auth_id } = req.body;
+  const { xp_earned } = game;
   Game.updateOne(
     { auth_id },
     { $push: { games: game } },
     { new: true, upsert: true }
-  ).exec((err, doc) => {
+  ).exec((err, gameDoc) => {
     if (err) return console.error(err);
-    defaultOkResponse(res, `Game saved: ${game}`);
+    User.findOneAndUpdate({ auth_id }, { $inc: { xp: xp_earned } }).exec(
+      (err, userDoc) => {
+        if (err) return console.error(err);
+        defaultOkResponse(res, { xp: userDoc.xp + xp_earned });
+      }
+    );
   });
 });
 
 router.post("/games/last-games", (req, res) => {
   const { auth_id } = req.body;
   const { quantity } = req.query;
-  const query = Game.findOne({ auth_id }).select("games").limit(quantity);
+  const query = Game.findOne({ auth_id }).select({
+    games: { $slice: parseInt(quantity) },
+  });
   query.exec((err, doc) => {
     if (err) return console.error(err);
-    defaultOkResponse(res, doc);
+    defaultOkResponse(res, {
+      games: doc.games.sort((a, b) => b.created_at - a.created_at),
+    });
   });
 });
 

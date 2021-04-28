@@ -23,7 +23,7 @@ router.get("/terrains/new", (req, res) => {
   } else {
     Terrain.aggregate([{ $sample: { size: 1 } }]).exec((err, terrain) => {
       if (err) return console.error("Error getting random terrain", err);
-      defaultOkResponse(res, terrain);
+      defaultOkResponse(res, terrain[0]);
     });
   }
 });

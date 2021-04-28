@@ -8,14 +8,12 @@ const UserSchema = new mongoose.Schema(
     first_name: String,
     last_name: String,
     locale: String,
+    xp: Number,
+    owned_cards: [String],
+    hand: [String],
     preferences: {
       language: String,
     },
-    profile: {
-      campaign_level: Number,
-      xp: Number,
-    },
-    owned_cards: [String],
   },
   { collection: "users", versionKey: false }
 );

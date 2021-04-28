@@ -11,10 +11,15 @@ router.get("/animals/all", (req, res) => {
 });
 
 router.get("/animals/filter", (req, res) => {
-  const { species, owned, skill_type } = req.query;
+  const { species, owned, skill_type, owned_to_filter } = req.query;
   const ownedAnimals = owned && owned.split(";");
+  const ownedAnimalsToFilter = owned_to_filter && owned_to_filter.split(";");
   AnimalCard.find({
-    ...(ownedAnimals ? { name: { $in: ownedAnimals } } : {}),
+    ...(ownedAnimals
+      ? { name: { $in: ownedAnimals } }
+      : ownedAnimalsToFilter
+      ? { name: { $nin: ownedAnimalsToFilter } }
+      : {}),
     ...(species ? { species } : {}),
     ...(skill_type ? { "skill.types": skill_type } : {}),
   }).exec((err, docs) => {
