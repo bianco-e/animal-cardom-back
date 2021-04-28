@@ -7,7 +7,7 @@ router.post("/users/create", (req, res) => {
   const newUser = new User(req.body);
   newUser.save((err, createdUser) => {
     if (err) return console.error("Error creating new user", err);
-    defaultOkResponse(res, `New user created: ${createdUser}`);
+    defaultOkResponse(res, createdUser);
   });
 });
 
