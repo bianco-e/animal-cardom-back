@@ -101,14 +101,29 @@ router.post("/games/save-game", (req, res) => {
 router.post("/games/last-games", (req, res) => {
   const { auth_id } = req.body;
   const { quantity } = req.query;
-  const query = Game.findOne({ auth_id }).select({
-    games: { $slice: parseInt(quantity) },
-  });
-  query.exec((err, doc) => {
+  Game.aggregate([
+    {
+      $match: {
+        auth_id,
+      },
+    },
+    { $unwind: "$games" },
+    {
+      $sort: {
+        "games.created_at": -1,
+      },
+    },
+    {
+      $group: {
+        _id: "$_id",
+        games: {
+          $push: "$games",
+        },
+      },
+    },
+  ]).exec((err, doc) => {
     if (err) return console.error(err);
-    defaultOkResponse(res, {
-      games: doc.games.sort((a, b) => b.created_at - a.created_at),
-    });
+    defaultOkResponse(res, doc[0].games);
   });
 });
 
