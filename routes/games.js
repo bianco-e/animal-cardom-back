@@ -101,6 +101,7 @@ router.post("/games/save-game", (req, res) => {
 router.post("/games/last-games", (req, res) => {
   const { auth_id } = req.body;
   const { quantity } = req.query;
+  const docsNumber = quantity ? parseInt(quantity) : 20;
   Game.aggregate([
     {
       $match: {
@@ -123,7 +124,10 @@ router.post("/games/last-games", (req, res) => {
     },
   ]).exec((err, doc) => {
     if (err) return console.error(err);
-    defaultOkResponse(res, doc[0].games);
+    defaultOkResponse(
+      res,
+      doc.length > 0 ? doc[0].games.slice(0, docsNumber) : []
+    );
   });
 });
 
