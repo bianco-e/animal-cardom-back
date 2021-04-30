@@ -45,8 +45,11 @@ router.get("/games/new-campaign", (req, res) => {
     (plantsErr, plantsDocs) => {
       if (plantsErr)
         return console.error("Error getting random initial plants", plantsErr);
+      const pcFilteredAnimals = campaignPcAnimals[xp]
+        .filter((animal) => !userCards.includes(animal))
+        .slice(0, 6);
       AnimalCard.find({
-        name: { $in: campaignPcAnimals[xp] },
+        name: { $in: pcFilteredAnimals },
       }).exec((pcAnimalsErr, pcAnimals) => {
         if (pcAnimalsErr)
           return console.error(
