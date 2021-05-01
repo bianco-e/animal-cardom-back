@@ -44,4 +44,16 @@ router.post("/users/hand/update", (req, res) => {
   });
 });
 
+router.post("/users/owned_cards/add", (req, res) => {
+  const { auth_id, new_card } = req.body;
+  User.updateOne(
+    { auth_id },
+    { $push: { owned_cards: new_card } },
+    { new: true, upsert: true }
+  ).exec((err, userDoc) => {
+    if (err) return console.error(err);
+    defaultOkResponse(res, new_card);
+  });
+});
+
 module.exports = router;
