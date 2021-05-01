@@ -47,7 +47,11 @@ router.get("/games/new-campaign", (req, res) => {
         return console.error("Error getting random initial plants", plantsErr);
       const pcFilteredAnimals = campaignPcAnimals[xp]
         .filter((animal) => !userCards.includes(animal))
-        .slice(0, 6);
+        .slice(0, 5);
+
+      console.log({ pcFilteredAnimals });
+      console.log({ campaignPcAnimals: campaignPcAnimals[xp] });
+
       AnimalCard.find({
         name: { $in: pcFilteredAnimals },
       }).exec((pcAnimalsErr, pcAnimals) => {
@@ -83,20 +87,23 @@ router.get("/games/new-campaign", (req, res) => {
 
 router.post("/games/save-game", (req, res) => {
   const { game, auth_id } = req.body;
-  const { xp_earned } = game;
+  const { xp_earned, earned_animal } = game;
   Game.updateOne(
     { auth_id },
-    { $push: { games: game } },
+    { $push: { games: { ...game, created_at: new Date().getTime() } } },
     { new: true, upsert: true }
   ).exec((err, gameDoc) => {
     if (err) return console.error(err);
     User.findOneAndUpdate(
       { auth_id },
-      { $inc: { xp: xp_earned } },
+      { $inc: { xp: xp_earned }, $push: { owned_cards: earned_animal } },
       { new: true }
     ).exec((err, userDoc) => {
       if (err) return console.error(err);
-      defaultOkResponse(res, { xp: userDoc.xp });
+      defaultOkResponse(res, {
+        xp: userDoc.xp,
+        earned_animal: userDoc.owned_cards[userDoc.owned_cards.length - 1],
+      });
     });
   });
 });
@@ -114,7 +121,7 @@ router.post("/games/last-games", (req, res) => {
     { $unwind: "$games" },
     {
       $sort: {
-        "games.created_at": -1,
+        "games.created_at": 1,
       },
     },
     {

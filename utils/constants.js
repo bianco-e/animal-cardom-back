@@ -53,7 +53,7 @@ module.exports = {
       "Bee",
       "Spider",
       "Scorpion",
-      "Ball bug",
+      "Ball Bug",
       "Leech",
       "Bat",
       "Toad",

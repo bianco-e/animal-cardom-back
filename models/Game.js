@@ -6,6 +6,7 @@ const GameSchema = new mongoose.Schema(
     games: [
       {
         created_at: Date,
+        earned_animal: String,
         terrain: String,
         xp_earned: Number,
         won: Boolean,
