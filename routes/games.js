@@ -49,9 +49,6 @@ router.get("/games/new-campaign", (req, res) => {
         .filter((animal) => !userCards.includes(animal))
         .slice(0, 5);
 
-      console.log({ pcFilteredAnimals });
-      console.log({ campaignPcAnimals: campaignPcAnimals[xp] });
-
       AnimalCard.find({
         name: { $in: pcFilteredAnimals },
       }).exec((pcAnimalsErr, pcAnimals) => {
@@ -121,7 +118,7 @@ router.post("/games/last-games", (req, res) => {
     { $unwind: "$games" },
     {
       $sort: {
-        "games.created_at": 1,
+        "games.created_at": -1,
       },
     },
     {
