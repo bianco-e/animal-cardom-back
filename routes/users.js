@@ -23,7 +23,12 @@ router.post("/users/me", (req, res) => {
 
 router.post("/users/profile", (req, res) => {
   const { auth_id } = req.body;
-  const query = User.findOne({ auth_id }).select(["xp", "owned_cards", "hand"]);
+  const query = User.findOne({ auth_id }).select([
+    "xp",
+    "owned_cards",
+    "hand",
+    "coins",
+  ]);
   query.exec((err, doc) => {
     if (err) return console.error(`Error getting user profile: ${err}`);
     if (doc) {

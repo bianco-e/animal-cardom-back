@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema(
     last_name: String,
     locale: String,
     xp: Number,
+    coins: Number,
     owned_cards: [String],
     hand: [String],
     preferences: {
