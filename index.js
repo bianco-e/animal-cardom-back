@@ -8,6 +8,9 @@ const gamesRoutes = require("./routes/games.js");
 const plantsRoutes = require("./routes/plants.js");
 const terrainsRoutes = require("./routes/terrains.js");
 const usersRoutes = require("./routes/users.js");
+const trackingRoutes = require("./routes/tracking.js");
+const feedbackRoutes = require("./routes/feedback.js");
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -18,6 +21,9 @@ app.use(gamesRoutes);
 app.use(plantsRoutes);
 app.use(terrainsRoutes);
 app.use(usersRoutes);
+app.use(trackingRoutes);
+app.use(feedbackRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("Animal Cardom");
