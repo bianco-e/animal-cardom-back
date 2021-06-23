@@ -84,7 +84,7 @@ router.get("/games/new-campaign", (req, res) => {
 
 router.post("/games/save-game", (req, res) => {
   const { game, auth_id } = req.body;
-  const { xp_earned, earned_animal } = game;
+  const { coins_earned, xp_earned, earned_animal } = game;
   Game.updateOne(
     { auth_id },
     { $push: { games: { ...game, created_at: new Date().getTime() } } },
@@ -93,7 +93,11 @@ router.post("/games/save-game", (req, res) => {
     if (err) return console.error(err);
     User.findOneAndUpdate(
       { auth_id },
-      { $inc: { xp: xp_earned }, $push: { owned_cards: earned_animal } },
+      {
+        $inc: { xp: xp_earned },
+        $push: { owned_cards: earned_animal },
+        $inc: { coins: coins_earned },
+      },
       { new: true }
     ).exec((err, userDoc) => {
       if (err) return console.error(err);

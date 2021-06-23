@@ -17,6 +17,7 @@ const AnimalCardSchema = new mongoose.Schema(
     paralyzed: Number,
     targeteable: Boolean,
     bleeding: Boolean,
+    price: Number,
   },
   { collection: "animals", versionKey: false }
 );

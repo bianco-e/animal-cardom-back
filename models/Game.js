@@ -8,6 +8,7 @@ const GameSchema = new mongoose.Schema(
         created_at: Date,
         earned_animal: String,
         terrain: String,
+        coins_earned: Number,
         xp_earned: Number,
         won: Boolean,
         usedAnimals: {

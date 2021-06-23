@@ -61,4 +61,16 @@ router.post("/users/owned_cards/add", (req, res) => {
   });
 });
 
+router.post("/users/animal_purchase", (req, res) => {
+  const { auth_id, new_card, price } = req.body;
+  User.updateOne(
+    { auth_id },
+    { $push: { owned_cards: new_card }, $inc: { coins: -price } },
+    { new: true, upsert: true }
+  ).exec((err, userDoc) => {
+    if (err) return console.error(err);
+    defaultOkResponse(res, { new_card: new_card });
+  });
+});
+
 module.exports = router;
