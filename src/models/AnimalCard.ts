@@ -1,6 +1,7 @@
-const mongoose = require("mongoose");
+import { Schema, model } from "mongoose";
+import { IAnimal } from "../interfaces";
 
-const AnimalCardSchema = new mongoose.Schema(
+const AnimalCardSchema = new Schema<IAnimal>(
   {
     created_at: Date,
     name: String,
@@ -22,4 +23,4 @@ const AnimalCardSchema = new mongoose.Schema(
   { collection: "animals", versionKey: false }
 );
 
-module.exports = mongoose.model("AnimalCard", AnimalCardSchema);
+export default model<IAnimal>("AnimalCard", AnimalCardSchema);

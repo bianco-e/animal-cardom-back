@@ -1,6 +1,7 @@
-const mongoose = require("mongoose");
+import { Schema, model } from "mongoose";
+import { IGame } from "../interfaces";
 
-const GameSchema = new mongoose.Schema(
+export const GameSchema = new Schema<IGame>(
   {
     auth_id: String,
     games: [
@@ -25,7 +26,11 @@ const GameSchema = new mongoose.Schema(
   { collection: "users-games", versionKey: false }
 );
 
-module.exports = {
-  GameModel: mongoose.model("Game", GameSchema),
+export const GameModel = model<IGame>("Game", GameSchema);
+
+const ModelObject = {
+  GameModel,
   GameSchema,
 };
+
+export default ModelObject;
