@@ -28,11 +28,11 @@ router.get("/terrains/new", (req: Request, res: Response) => {
     );
   } else {
     Terrain.aggregate([{ $sample: { size: 1 } }]).exec(
-      (randomErr: CallbackError, randomTerrain: ITerrain[]) => {
+      (randomErr: CallbackError, randomTerrainArray: ITerrain[]) => {
         responseHandler(
           res,
           randomErr,
-          randomTerrain,
+          randomTerrainArray[0],
           `Error getting random terrain`
         );
       }
