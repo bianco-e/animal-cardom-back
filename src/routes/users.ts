@@ -76,7 +76,9 @@ router.post("/users/owned_cards/add", (req: Request, res: Response) => {
         responseHandler(res, err, new_card, "Error adding new card");
       });
     } else
-      defaultOkResponse(res, `That card is already owned or does not exist`);
+      defaultOkResponse(res, {
+        error: `That card is already owned or does not exist`,
+      });
   });
 });
 
