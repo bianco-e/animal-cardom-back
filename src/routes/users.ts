@@ -2,7 +2,7 @@ import express, { Request, Response, Router } from "express";
 import { CallbackError } from "mongoose";
 import { IUser } from "../interfaces";
 import User from "../models/User";
-import { responseHandler } from "../utils/defaultResponses";
+import { defaultOkResponse, responseHandler } from "../utils/defaultResponses";
 import log from "../utils/logger";
 const router: Router = express.Router();
 
@@ -75,7 +75,8 @@ router.post("/users/owned_cards/add", (req: Request, res: Response) => {
       ).exec((err: CallbackError) => {
         responseHandler(res, err, new_card, "Error adding new card");
       });
-    }
+    } else
+      defaultOkResponse(res, `That card is already owned or does not exist`);
   });
 });
 
