@@ -61,18 +61,21 @@ router.post("/users/hand/update", (req: Request, res: Response) => {
 
 router.post("/users/owned_cards/add", (req: Request, res: Response) => {
   const { auth_id, new_card } = req.body;
-  User.updateOne(
-    { auth_id },
-    { $push: { owned_cards: new_card } },
-    { new: true, upsert: true }
-  ).exec((err: CallbackError) => {
-    responseHandler(
-      res,
-      err,
-      new_card,
-      "Error adding new card",
-      "User not found"
-    );
+  const query = User.findOne({ auth_id }).select(["owned_cards"]);
+  query.exec((findingError: CallbackError, user: IUser | null) => {
+    if (findingError)
+      return log.error("Error looking for user", JSON.stringify(findingError));
+    if (!user) return log.error("User not found", JSON.stringify(findingError));
+    const { owned_cards } = user;
+    if (new_card && !owned_cards.includes(new_card)) {
+      User.updateOne(
+        { auth_id },
+        { $push: { owned_cards: new_card } },
+        { new: true, upsert: true }
+      ).exec((err: CallbackError) => {
+        responseHandler(res, err, new_card, "Error adding new card");
+      });
+    }
   });
 });
 
