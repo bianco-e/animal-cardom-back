@@ -4,7 +4,7 @@ import AnimalCard from "../models/AnimalCard";
 import PlantCard from "../models/PlantCard";
 import User from "../models/User";
 import { GameModel as Game } from "../models/Game";
-import { defaultOkResponse } from "../utils/defaultResponses";
+import { defaultOkResponse, responseHandler } from "../utils/defaultResponses";
 import { campaignPcAnimals } from "../utils/constants";
 import { IAnimal, IGame, IUser } from "../interfaces";
 const router: Router = express.Router();
@@ -19,7 +19,7 @@ router.get("/games/new-random", (req: Request, res: Response) => {
         (plantsErr: CallbackError, plantsDocs: Document[]) => {
           if (plantsErr)
             return console.error(
-              "Error getting random initial hands",
+              "Error getting random initial plants",
               plantsErr
             );
           const response = {
@@ -108,11 +108,16 @@ router.post("/games/save-game", (req: Request, res: Response) => {
         },
         { new: true }
       ).exec((err: CallbackError, userDoc: IUser | null) => {
-        if (err || !userDoc) return console.error(err);
-        defaultOkResponse(res, {
-          xp: userDoc.xp,
-          earned_animal: userDoc.owned_cards[userDoc.owned_cards.length - 1],
-        });
+        responseHandler(
+          res,
+          err,
+          {
+            xp: userDoc?.xp,
+            earned_animal: userDoc?.owned_cards[userDoc.owned_cards.length - 1],
+          },
+          "Error saving game",
+          "User does not exist"
+        );
       });
     });
   }
@@ -143,10 +148,11 @@ router.post("/games/last-games", (req: Request, res: Response) => {
       },
     },
   ]).exec((err: CallbackError, docs: IGame[]) => {
-    if (err) return console.error(err);
-    defaultOkResponse(
+    responseHandler(
       res,
-      docs.length > 0 ? docs[0].games.slice(0, docsNumber) : []
+      err,
+      docs.length > 0 ? docs[0].games.slice(0, docsNumber) : [],
+      "Error getting last games"
     );
   });
 });

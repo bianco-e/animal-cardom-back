@@ -3,12 +3,11 @@ import { CallbackError } from "mongoose";
 import { ITerrain } from "../interfaces";
 const router: Router = express.Router();
 import Terrain from "../models/Terrain";
-import { defaultOkResponse } from "../utils/defaultResponses";
+import { defaultOkResponse, responseHandler } from "../utils/defaultResponses";
 
 router.get("/terrains/all", (req: Request, res: Response) => {
-  Terrain.find({}).exec((err, docs) => {
-    if (err) return console.error("Error getting all terrains", err);
-    defaultOkResponse(res, { terrains: docs });
+  Terrain.find({}).exec((err: CallbackError, terrains: ITerrain[]) => {
+    responseHandler(res, err, { terrains }, "Error getting all terrains");
   });
 });
 
@@ -17,17 +16,25 @@ router.get("/terrains/new", (req: Request, res: Response) => {
   if (name) {
     const parsedName = name.toString();
     Terrain.findOne({ name: { $regex: parsedName, $options: "i" } }).exec(
-      (err: CallbackError, terrain: ITerrain | null) => {
-        if (err || !terrain)
-          return console.error(`Error getting ${req.query.name} terrain`, err);
-        defaultOkResponse(res, terrain);
+      (byNameErr: CallbackError, terrain: ITerrain | null) => {
+        responseHandler(
+          res,
+          byNameErr,
+          terrain,
+          `Error getting ${req.query.name} terrain`,
+          "Terrain does not exist"
+        );
       }
     );
   } else {
     Terrain.aggregate([{ $sample: { size: 1 } }]).exec(
-      (err: CallbackError, terrain: ITerrain[]) => {
-        if (err) return console.error("Error getting random terrain", err);
-        defaultOkResponse(res, terrain[0]);
+      (randomErr: CallbackError, randomTerrain: ITerrain[]) => {
+        responseHandler(
+          res,
+          randomErr,
+          randomTerrain,
+          `Error getting random terrain`
+        );
       }
     );
   }

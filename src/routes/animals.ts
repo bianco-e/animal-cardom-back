@@ -2,13 +2,12 @@ import express, { Request, Response, Router } from "express";
 import { CallbackError } from "mongoose";
 import { IAnimal } from "../interfaces";
 import AnimalCard from "../models/AnimalCard";
-import { defaultOkResponse } from "../utils/defaultResponses";
+import { defaultOkResponse, responseHandler } from "../utils/defaultResponses";
 const router: Router = express.Router();
 
 router.get("/animals/all", (req: Request, res: Response) => {
   AnimalCard.find({}).exec((err: CallbackError, animals: IAnimal[]) => {
-    if (err) return console.error("Error getting all animals", err);
-    defaultOkResponse(res, { animals });
+    responseHandler(res, err, { animals }, "Error getting all animals");
   });
 });
 
@@ -17,8 +16,7 @@ router.get("/animals/newest", (req: Request, res: Response) => {
     .sort("-created_at")
     .limit(3)
     .exec((err: CallbackError, animals: IAnimal[]) => {
-      if (err) return console.error("Error getting newest animals", err);
-      defaultOkResponse(res, { animals });
+      responseHandler(res, err, { animals }, "Error getting newest animals");
     });
 });
 
@@ -37,8 +35,7 @@ router.get("/animals/filter", (req: Request, res: Response) => {
     ...(parsedSpecies ? { species: parsedSpecies } : {}),
     ...(skill_type ? { "skill.types": skill_type } : {}),
   }).exec((err: CallbackError, animals: IAnimal[]) => {
-    if (err) return console.error("Error getting all animals", err);
-    defaultOkResponse(res, { animals });
+    responseHandler(res, err, { animals }, "Error getting filtered animals");
   });
 });
 
@@ -48,8 +45,12 @@ router.post("/animals/create", (req: Request, res: Response) => {
     created_at: new Date().getTime(),
   });
   newCard.save((err: CallbackError, createdAnimalCard: IAnimal) => {
-    if (err) return console.error("Error creating new animal card", err);
-    defaultOkResponse(res, `New card created: ${createdAnimalCard}`);
+    responseHandler(
+      res,
+      err,
+      createdAnimalCard,
+      "Error creating new animal card"
+    );
   });
 });
 
