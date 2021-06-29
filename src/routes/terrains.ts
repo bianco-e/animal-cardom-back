@@ -4,6 +4,7 @@ import { ITerrain } from "../interfaces";
 const router: Router = express.Router();
 import Terrain from "../models/Terrain";
 import { defaultOkResponse, responseHandler } from "../utils/defaultResponses";
+import log from "../utils/logger";
 
 router.get("/terrains/all", (req: Request, res: Response) => {
   Terrain.find({}).exec((err: CallbackError, terrains: ITerrain[]) => {
@@ -46,7 +47,9 @@ router.post("/terrains/create-many", (req: Request, res: Response) => {
     .then(() => {
       defaultOkResponse(res, `${terrainsArray.length} terrains created`);
     })
-    .catch((err) => console.error("Error creating many terrains", err));
+    .catch((err) =>
+      log.error("Error creating many terrains", JSON.stringify(err))
+    );
 });
 
 export default router;

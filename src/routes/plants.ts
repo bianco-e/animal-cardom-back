@@ -3,6 +3,7 @@ import { CallbackError } from "mongoose";
 import { IPlant } from "../interfaces";
 import PlantCard from "../models/PlantCard";
 import { defaultOkResponse, responseHandler } from "../utils/defaultResponses";
+import log from "../utils/logger";
 const router: Router = express.Router();
 
 router.get("/plants/all", (req: Request, res: Response) => {
@@ -29,7 +30,9 @@ router.post("/plants/create-many", (req: Request, res: Response) => {
     .then(() => {
       defaultOkResponse(res, `${plantsCardsArray.length} plants created`);
     })
-    .catch((err) => console.error("Error creating many plants cards", err));
+    .catch((err) =>
+      log.error("Error creating many plants cards", JSON.stringify(err))
+    );
 });
 
 export default router;

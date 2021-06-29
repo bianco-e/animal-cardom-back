@@ -3,6 +3,7 @@ import { CallbackError } from "mongoose";
 import { IUser } from "../interfaces";
 import User from "../models/User";
 import { responseHandler } from "../utils/defaultResponses";
+import log from "../utils/logger";
 const router: Router = express.Router();
 
 router.post("/users/create", (req: Request, res: Response) => {
@@ -95,9 +96,9 @@ router.post("/users/animal_purchase", (req, res) => {
 router.post("/users/clean/owned_cards", (req: Request, res: Response) => {
   const { auth_id } = req.body;
   const query = User.findOne({ auth_id }).select(["owned_cards"]);
-  query.exec((err: CallbackError, user: IUser | null) => {
-    if (err) return console.error(err);
-    if (!user) return console.error(err);
+  query.exec((findingError: CallbackError, user: IUser | null) => {
+    if (findingError) return log.error(JSON.stringify(findingError));
+    if (!user) return log.error(JSON.stringify(findingError));
     const { owned_cards } = user;
     const filteredCards = owned_cards.reduce((acc: string[], curr: string) => {
       if (curr && !acc.includes(curr)) {
@@ -106,7 +107,7 @@ router.post("/users/clean/owned_cards", (req: Request, res: Response) => {
     }, []);
     User.updateOne({ auth_id }, { owned_cards: filteredCards }).exec(
       (err: CallbackError) => {
-        if (err) return console.error(err);
+        if (err) return log.error(JSON.stringify(err));
         res.send(filteredCards);
       }
     );

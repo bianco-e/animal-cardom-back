@@ -6,6 +6,7 @@ import User from "../models/User";
 import { GameModel as Game } from "../models/Game";
 import { defaultOkResponse, responseHandler } from "../utils/defaultResponses";
 import { campaignPcAnimals } from "../utils/constants";
+import log from "../utils/logger";
 import { IAnimal, IGame, IUser } from "../interfaces";
 const router: Router = express.Router();
 
@@ -14,13 +15,16 @@ router.get("/games/new-random", (req: Request, res: Response) => {
   AnimalCard.aggregate([{ $sample: { size: 10 } }]).exec(
     (animalsErr: CallbackError, animalsDocs: Document[]) => {
       if (animalsErr)
-        return console.error("Error getting random initial hands", animalsErr);
+        return log.error(
+          "Error getting random initial hands",
+          JSON.stringify(animalsErr)
+        );
       PlantCard.aggregate([{ $sample: { size: 6 } }]).exec(
         (plantsErr: CallbackError, plantsDocs: Document[]) => {
           if (plantsErr)
-            return console.error(
+            return log.error(
               "Error getting random initial plants",
-              plantsErr
+              JSON.stringify(plantsErr)
             );
           const response = {
             user: {
@@ -48,9 +52,9 @@ router.get("/games/new-campaign", (req: Request, res: Response) => {
     PlantCard.aggregate([{ $sample: { size: 6 } }]).exec(
       (plantsErr: Error, plantsDocs: Document[]) => {
         if (plantsErr)
-          return console.error(
+          return log.error(
             "Error getting random initial plants",
-            plantsErr
+            JSON.stringify(plantsErr)
           );
         const pcFilteredAnimals = campaignPcAnimals[parsedXp]
           .filter((animal: string) => !userCards.includes(animal))
@@ -60,17 +64,17 @@ router.get("/games/new-campaign", (req: Request, res: Response) => {
           name: { $in: pcFilteredAnimals },
         }).exec((pcAnimalsErr: CallbackError, pcAnimals: IAnimal[]) => {
           if (pcAnimalsErr)
-            return console.error(
+            return log.error(
               "Error getting pc initial hand for campaign",
-              pcAnimalsErr
+              JSON.stringify(pcAnimalsErr)
             );
           AnimalCard.find({
             name: { $in: userCards },
           }).exec((userAnimalsErr: CallbackError, userAnimals: IAnimal[]) => {
             if (userAnimalsErr)
-              return console.error(
+              return log.error(
                 "Error getting pc initial hand for campaign",
-                userAnimalsErr
+                JSON.stringify(userAnimalsErr)
               );
             const response = {
               user: {
@@ -99,7 +103,8 @@ router.post("/games/save-game", (req: Request, res: Response) => {
       { $push: { games: { ...game, created_at: new Date().getTime() } } },
       { new: true, upsert: true }
     ).exec((error: CallbackError) => {
-      if (error) return console.error(error);
+      if (error)
+        return log.error("Error saving last game", JSON.stringify(error));
       User.findOneAndUpdate(
         { auth_id },
         {

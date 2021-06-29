@@ -3,6 +3,7 @@ import { CallbackError } from "mongoose";
 import { IAnimal } from "../interfaces";
 import AnimalCard from "../models/AnimalCard";
 import { defaultOkResponse, responseHandler } from "../utils/defaultResponses";
+import log from "../utils/logger";
 const router: Router = express.Router();
 
 router.get("/animals/all", (req: Request, res: Response) => {
@@ -63,7 +64,9 @@ router.post("/animals/create-many", (req: Request, res: Response) => {
     .then(() => {
       defaultOkResponse(res, `${cardsArray.length} cards created`);
     })
-    .catch((err) => console.error("Error creating many animals cards", err));
+    .catch((err) =>
+      log.error("Error creating many animals cards", JSON.stringify(err))
+    );
 });
 
 export default router;
