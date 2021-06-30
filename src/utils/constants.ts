@@ -1,3 +1,19 @@
+const INITIAL_ANIMALS = [
+  "Alligator",
+  "Basilisk Lizard",
+  "Little Lion",
+  "Octopus",
+  "Vulture",
+];
+
+export const NEW_USER_TEMPLATE = {
+  coins: 0,
+  xp: 0,
+  owned_cards: INITIAL_ANIMALS,
+  hand: INITIAL_ANIMALS,
+  preferences: { language: "en" },
+};
+
 export const campaignPcAnimals: { [x: number]: string[] } = {
   0: [
     "Mosquito",

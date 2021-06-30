@@ -2,12 +2,13 @@ import express, { Request, Response, Router } from "express";
 import { CallbackError } from "mongoose";
 import { IUser } from "../interfaces";
 import User from "../models/User";
+import { NEW_USER_TEMPLATE } from "../utils/constants";
 import { defaultOkResponse, responseHandler } from "../utils/defaultResponses";
 import log from "../utils/logger";
 const router: Router = express.Router();
 
 router.post("/users/create", (req: Request, res: Response) => {
-  const newUser = new User(req.body);
+  const newUser = new User({ ...req.body, ...NEW_USER_TEMPLATE });
   newUser.save((err: CallbackError, createdUser: IUser) => {
     responseHandler(res, err, createdUser, "Error creating new user");
   });
