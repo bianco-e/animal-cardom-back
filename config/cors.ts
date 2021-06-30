@@ -7,7 +7,7 @@ const CORS_WHITE_LIST: string[] = [
 
 const CORS_CONFIG: CorsOptions = {
   origin: (origin: string | undefined, callback: any) => {
-    if (CORS_WHITE_LIST.includes(origin!)) {
+    if (CORS_WHITE_LIST.includes(origin!) || !origin) {
       callback(null, true);
     } else callback(new Error("Not allowed by CORS"));
   },
