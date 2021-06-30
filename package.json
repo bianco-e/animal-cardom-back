@@ -5,7 +5,7 @@
   "author": "bianco-e",
   "license": "MIT",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node build/src/index.js",
     "dev": "nodemon src/index.ts",
     "build": "rm -rf build/ && tsc"
   },
