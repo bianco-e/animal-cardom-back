@@ -3,7 +3,6 @@ import { NativeError } from "mongoose";
 import log from "../utils/logger";
 
 export const defaultOkResponse = (res: Response, message: string | object) => {
-  res.header("Access-Control-Allow-Origin", "*");
   res.status(200).send(message);
   res.end();
 };
@@ -14,7 +13,6 @@ export const defaultErrorResponse = (
   error: string | NativeError
 ) => {
   log.error(`Message: ${message} | Error: ${error}`);
-  res.header("Access-Control-Allow-Origin", "*");
   res.status(400).send({ message, error });
   res.end();
 };

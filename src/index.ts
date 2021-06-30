@@ -2,6 +2,7 @@ import express, { Express, Request, Response } from "express";
 import cors from "cors";
 import mongoose from "mongoose";
 // config variables
+import CORS_CONFIG from "../config/cors";
 import DB_URL from "../config/database";
 import SERVER_CONFIG from "../config/server";
 // routes
@@ -10,7 +11,7 @@ import routes from "./routes";
 import log from "./utils/logger";
 
 const app: Express = express();
-app.use(cors());
+app.use(cors(CORS_CONFIG));
 app.use(express.json());
 app.use(...routes);
 
