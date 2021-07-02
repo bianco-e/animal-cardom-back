@@ -24,7 +24,7 @@ Receives an array of objects with the structure of an animal as body
 
 ### Feedback
 
-- POST `/give_feedback` - Creates a new feedback message
+- POST `/feedback/give` - Creates a new feedback message
 
 ```
 Receives an object with name (optional) and message properties as body
@@ -78,7 +78,7 @@ Receives an array of objects with the structure of a terrain as body
 
 ### Tracking
 
-- POST `/track_action` - Saves action to track
+- POST `/tracking/track_action` - Saves action to track
 
 ```
 Receives an object with auth_id (optional), utm (optional), guest_name (optional), and action properties as body
