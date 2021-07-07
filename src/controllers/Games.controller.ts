@@ -8,6 +8,7 @@ import { defaultOkResponse, responseHandler } from "../utils/defaultResponses";
 import { campaignPcAnimals } from "../utils/constants";
 import log from "../utils/logger";
 import { IAnimal, IGame, IUser } from "../interfaces";
+import { getTimeStamp } from "../utils";
 
 export class GamesController {
   static async getRandomGame(req: Request, res: Response) {
@@ -99,7 +100,7 @@ export class GamesController {
     if (coins_earned && xp_earned && earned_animal && auth_id) {
       Game.updateOne(
         { auth_id },
-        { $push: { games: { ...game, created_at: new Date().getTime() } } },
+        { $push: { games: { ...game, created_at: getTimeStamp() } } },
         { new: true, upsert: true }
       ).exec((error: CallbackError) => {
         if (error)

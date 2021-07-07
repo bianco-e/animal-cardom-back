@@ -1,3 +1,2 @@
-export const getTimeStamp = (): string => {
-  return new Date().toISOString();
-};
+export const getTimeStamp = (): number => new Date().getTime();
+export const getISOStringDate = (): string => new Date().toISOString();

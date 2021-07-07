@@ -3,8 +3,7 @@ import { CallbackError } from "mongoose";
 import { IUser } from "../interfaces";
 import User from "../models/User";
 import { NEW_USER_TEMPLATE } from "../utils/constants";
-import { defaultOkResponse, responseHandler } from "../utils/defaultResponses";
-import log from "../utils/logger";
+import { responseHandler } from "../utils/defaultResponses";
 
 export class UsersController {
   static async createUser(req: Request, res: Response) {

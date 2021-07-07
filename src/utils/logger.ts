@@ -1,7 +1,7 @@
-import { getTimeStamp } from "./index";
+import { getISOStringDate } from "./index";
 
 const buildMessage = (message: string, type: string, data?: string) =>
-  `[${getTimeStamp()}] [${type}] ${data ? `[${data}]` : ""} [${message}]`;
+  `[${getISOStringDate()}] [${type}] ${data ? `[${data}]` : ""} [${message}]`;
 
 const info = (message: string, data?: string): string => {
   const INFO = buildMessage(message, "INFO", data);

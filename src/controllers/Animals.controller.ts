@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { CallbackError } from "mongoose";
 import { IAnimal } from "../interfaces";
 import AnimalCard from "../models/AnimalCard";
+import { getTimeStamp } from "../utils";
 import { defaultOkResponse, responseHandler } from "../utils/defaultResponses";
 import log from "../utils/logger";
 
@@ -23,17 +24,15 @@ export class AnimalsController {
 
   static async getFilteredAnimals(req: Request, res: Response) {
     const { species, owned, skill_type, owned_to_filter } = req.query;
-    const parsedSpecies = species?.toString();
-    const ownedAnimals = owned && owned.toString().split(";");
-    const ownedAnimalsToFilter =
-      owned_to_filter && owned_to_filter.toString().split(";");
+    const parseStringToArray = (string: any): string[] =>
+      string.toString().split(";");
     AnimalCard.find({
-      ...(ownedAnimals
-        ? { name: { $in: ownedAnimals } }
-        : ownedAnimalsToFilter
-        ? { name: { $nin: ownedAnimalsToFilter } }
+      ...(owned
+        ? { name: { $in: parseStringToArray(owned) } }
+        : owned_to_filter
+        ? { name: { $nin: parseStringToArray(owned_to_filter) } }
         : {}),
-      ...(parsedSpecies ? { species: parsedSpecies } : {}),
+      ...(species ? { species: species.toString() } : {}),
       ...(skill_type ? { "skill.types": skill_type } : {}),
     }).exec((err: CallbackError, animals: IAnimal[]) => {
       responseHandler(res, err, { animals }, "Error getting filtered animals");
@@ -43,7 +42,7 @@ export class AnimalsController {
   static async createAnimal(req: Request, res: Response) {
     const newCard = new AnimalCard({
       ...req.body,
-      created_at: new Date().getTime(),
+      created_at: getTimeStamp(),
     });
     newCard.save((err: CallbackError, createdAnimalCard: IAnimal) => {
       responseHandler(
@@ -58,7 +57,7 @@ export class AnimalsController {
   static async createManyAnimals(req: Request, res: Response) {
     const cardsArray = req.body.map((card: IAnimal) => ({
       ...card,
-      created_at: new Date().getTime(),
+      created_at: getTimeStamp(),
     }));
     AnimalCard.create(cardsArray)
       .then(() => {
