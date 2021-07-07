@@ -9,10 +9,10 @@ export const defaultOkResponse = (res: Response, message: string | object) => {
 
 export const defaultErrorResponse = (
   res: Response,
-  message: string,
-  error: string | NativeError
+  error: string | NativeError,
+  message?: string
 ) => {
-  log.error(`Message: ${message} | Error: ${error}`);
+  log.error(`${message ? `Message: ${message} | ` : ""}Error: ${error}`);
   res.status(400).send({ message, error });
   res.end();
 };
@@ -24,7 +24,7 @@ export const responseHandler = (
   errMsg: string,
   nullDocMsg?: string
 ) => {
-  if (err) return defaultErrorResponse(res, errMsg, err);
-  if (!doc && nullDocMsg) return defaultErrorResponse(res, nullDocMsg, err!);
+  if (err) return defaultErrorResponse(res, err, errMsg);
+  if (!doc && nullDocMsg) return defaultErrorResponse(res, nullDocMsg);
   return defaultOkResponse(res, doc);
 };

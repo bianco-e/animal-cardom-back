@@ -11,23 +11,11 @@ export class TerrainsController {
       responseHandler(res, err, { terrains }, "Error getting all terrains");
     });
   }
+
   static async getNewTerrain(req: Request, res: Response) {
     const { name } = req.query;
-    if (name) {
-      const parsedName = name.toString();
-      Terrain.findOne({ name: { $regex: parsedName, $options: "i" } }).exec(
-        (byNameErr: CallbackError, terrain: ITerrain | null) => {
-          responseHandler(
-            res,
-            byNameErr,
-            terrain,
-            `Error getting ${req.query.name} terrain`,
-            "Terrain does not exist"
-          );
-        }
-      );
-    } else {
-      Terrain.aggregate([{ $sample: { size: 1 } }]).exec(
+    if (!name)
+      return Terrain.aggregate([{ $sample: { size: 1 } }]).exec(
         (randomErr: CallbackError, randomTerrainArray: ITerrain[]) => {
           responseHandler(
             res,
@@ -37,8 +25,20 @@ export class TerrainsController {
           );
         }
       );
-    }
+    const parsedName = name.toString();
+    Terrain.findOne({
+      name: { $regex: parsedName, $options: "i" },
+    }).exec((byNameErr: CallbackError, terrain: ITerrain | null) => {
+      responseHandler(
+        res,
+        byNameErr,
+        terrain,
+        `Error getting ${req.query.name} terrain`,
+        "Terrain does not exist"
+      );
+    });
   }
+
   static async createManyTerrains(req: Request, res: Response) {
     const terrainsArray = req.body;
     Terrain.create(terrainsArray)

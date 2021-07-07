@@ -48,43 +48,35 @@ export class UsersController {
 
   static async updateUserHand(req: Request, res: Response) {
     const { auth_id, hand } = req.body;
-    const query = User.findOneAndUpdate({ auth_id }, { hand }, { new: true });
-    query.exec((err: CallbackError, newUser: IUser | null) => {
-      responseHandler(
-        res,
-        err,
-        newUser?.hand,
-        "Error updating user hand",
-        "User to update not found"
-      );
-    });
+    User.findOneAndUpdate({ auth_id }, { hand }, { new: true }).exec(
+      (err: CallbackError, newUser: IUser | null) => {
+        responseHandler(
+          res,
+          err,
+          newUser?.hand,
+          "Error updating user hand",
+          "User to update not found"
+        );
+      }
+    );
   }
 
   static async addCardToUserOwnedCards(req: Request, res: Response) {
     const { auth_id, new_card } = req.body;
-    const query = User.findOne({ auth_id }).select(["owned_cards"]);
-    query.exec((findingError: CallbackError, user: IUser | null) => {
-      if (findingError)
-        return log.error(
-          "Error looking for user",
-          JSON.stringify(findingError)
+    if (new_card) {
+      User.findOneAndUpdate(
+        { auth_id, owned_cards: { $nin: new_card } },
+        { $push: { owned_cards: new_card } }
+      ).exec((err: CallbackError, newUser: IUser | null) => {
+        responseHandler(
+          res,
+          err,
+          newUser,
+          "Error adding new card",
+          "User does not exist or already has this card"
         );
-      if (!user)
-        return log.error("User not found", JSON.stringify(findingError));
-      const { owned_cards } = user;
-      if (new_card && !owned_cards.includes(new_card)) {
-        User.updateOne(
-          { auth_id },
-          { $push: { owned_cards: new_card } },
-          { new: true, upsert: true }
-        ).exec((err: CallbackError) => {
-          responseHandler(res, err, new_card, "Error adding new card");
-        });
-      } else
-        defaultOkResponse(res, {
-          error: `That card is already owned or does not exist`,
-        });
-    });
+      });
+    }
   }
 
   static async purchaseAnimal(req: Request, res: Response) {

@@ -45,7 +45,7 @@ export class GamesController {
 
   static async getNewCampaign(req: Request, res: Response) {
     const { xp, user_cards } = req.query;
-    if ((xp !== undefined) !== undefined && user_cards) {
+    if (xp !== undefined && user_cards) {
       const parsedXp: number = parseInt(xp!.toString());
       const userCards: string[] = user_cards.toString().split(";");
       PlantCard.aggregate([{ $sample: { size: 6 } }]).exec(
