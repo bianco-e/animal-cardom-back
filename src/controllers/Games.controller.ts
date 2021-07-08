@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { CallbackError, Error } from "mongoose";
+import { CallbackError, Error, startSession } from "mongoose";
 import AnimalCard from "../models/AnimalCard";
 import PlantCard from "../models/PlantCard";
 import User from "../models/User";
@@ -96,37 +96,69 @@ export class GamesController {
 
   static async saveGame(req: Request, res: Response) {
     const { game, auth_id } = req.body;
-    const { coins_earned, xp_earned, earned_animal } = game;
-    if (coins_earned && xp_earned && earned_animal && auth_id) {
-      Game.updateOne(
-        { auth_id },
-        { $push: { games: { ...game, created_at: getTimeStamp() } } },
-        { new: true, upsert: true }
-      ).exec((error: CallbackError) => {
-        if (error)
-          return log.error("Error saving last game", JSON.stringify(error));
-        User.findOneAndUpdate(
-          { auth_id },
-          {
-            $inc: { coins: coins_earned, xp: xp_earned },
-            $push: { owned_cards: earned_animal },
-          },
-          { new: true }
-        ).exec((err: CallbackError, userDoc: IUser | null) => {
-          responseHandler(
-            res,
-            err,
-            {
-              xp: userDoc?.xp,
-              earned_animal:
-                userDoc?.owned_cards[userDoc.owned_cards.length - 1],
-            },
-            "Error saving game",
-            "User does not exist"
-          );
+    const { coins_earned, xp_earned, earned_animal, usedAnimals, usedPlants } =
+      game;
+    if (
+      auth_id &&
+      xp_earned !== undefined &&
+      coins_earned !== undefined &&
+      usedAnimals &&
+      usedPlants
+    ) {
+      const session = await startSession();
+      try {
+        let transactionResult = null;
+        const transaction = await session.withTransaction(async () => {
+          const abort = async (message: string) => {
+            await session.abortTransaction();
+            log.error(message);
+            return;
+          };
+          try {
+            await Game.updateOne(
+              { auth_id },
+              { $push: { games: { ...game, created_at: getTimeStamp() } } },
+              { new: true, session, upsert: true }
+            );
+
+            const user = await User.findOne({ auth_id }).select("owned_cards");
+            if (!user) throw new Error("User does not exist");
+            const userOwnsCard =
+              earned_animal && user?.owned_cards.includes(earned_animal);
+            const updatedUser = await User.findOneAndUpdate(
+              { auth_id },
+              {
+                $inc: { coins: coins_earned, xp: xp_earned },
+                ...(!userOwnsCard
+                  ? { $push: { owned_cards: earned_animal } }
+                  : {}),
+              },
+              { new: true, session }
+            );
+            transactionResult = {
+              xp: updatedUser?.xp,
+              earned_animal,
+            };
+          } catch (e) {
+            return abort(`Error saving last game ${JSON.stringify(e)}`);
+          }
         });
-      });
-    }
+
+        if (transaction && transactionResult) {
+          res.status(200).send(transactionResult);
+        } else {
+          log.error(`Transaction intentionally aborted`);
+          res
+            .status(500)
+            .send(`Transaction intentionally aborted. See error log`);
+        }
+      } catch (e) {
+        log.error(`Transaction aborted due to an unexpected error: ${e}`);
+        res.status(500).send(e);
+      } finally {
+        await session.endSession();
+      }
+    } else res.status(400).send("Not all required arguments were sent");
   }
 
   static async getLastGames(req: Request, res: Response) {
