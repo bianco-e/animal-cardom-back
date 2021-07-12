@@ -6,6 +6,8 @@
 
 - GET `/animals/all` - Returns an array with all existing animals
 
+- GET `/animals/all/statistics` - Returns an object with all existing animals statistics, total quantity, quantity by species, etc.
+
 - GET `/animals/newest` - Returns an array with the newest 3 animals
 
 - GET `/animals/filter` - Returns an array with all existing animals filtered by `species`, `skill_type` and `owned` params

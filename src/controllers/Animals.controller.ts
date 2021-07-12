@@ -13,6 +13,87 @@ export class AnimalsController {
     });
   }
 
+  static async getAllAnimalsStatistics(req: Request, res: Response) {
+    AnimalCard.find({}).exec((err: CallbackError, animals: IAnimal[]) => {
+      const animalsBySpecies = animals.reduce(
+        (
+          acc: {
+            [x: string]: {
+              quantity: number;
+              highestAttack?: { name: string; attack: number };
+              highestLife?: { name: string; life: number };
+            };
+          },
+          curr: IAnimal
+        ) => {
+          if (curr.species in acc) {
+            const accSpecies = acc[curr.species];
+            return {
+              ...acc,
+              [curr.species]: {
+                ...accSpecies,
+                quantity: accSpecies.quantity + 1,
+                ...(!accSpecies.highestAttack ||
+                accSpecies.highestAttack.attack < curr.attack.initial
+                  ? {
+                      highestAttack: {
+                        name: curr.name,
+                        attack: curr.attack.initial,
+                      },
+                    }
+                  : {}),
+                ...(!accSpecies.highestLife ||
+                accSpecies.highestLife.life < curr.life.initial
+                  ? {
+                      highestLife: { name: curr.name, life: curr.life.initial },
+                    }
+                  : {}),
+              },
+            };
+          } else return acc;
+        },
+        {
+          "🐸": {
+            quantity: 0,
+            highestAttack: undefined,
+            highestLife: undefined,
+          },
+          "🦅": {
+            quantity: 0,
+            highestAttack: undefined,
+            highestLife: undefined,
+          },
+          "🦈": {
+            quantity: 0,
+            highestAttack: undefined,
+            highestLife: undefined,
+          },
+          "🦂": {
+            quantity: 0,
+            highestAttack: undefined,
+            highestLife: undefined,
+          },
+          "🐺": {
+            quantity: 0,
+            highestAttack: undefined,
+            highestLife: undefined,
+          },
+          "🦎": {
+            quantity: 0,
+            highestAttack: undefined,
+            highestLife: undefined,
+          },
+        }
+      );
+      responseHandler(
+        res,
+        err,
+        { all: animals.length, ...animalsBySpecies },
+        "Error getting all animals statistics"
+      );
+    });
+  }
+
   static async getNewestAnimals(req: Request, res: Response) {
     AnimalCard.find({})
       .sort("-created_at")
