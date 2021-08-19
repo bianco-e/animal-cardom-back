@@ -4,6 +4,7 @@ import { IAction } from "../interfaces";
 const ActionSchema = new Schema<IAction>(
   {
     action: String,
+    user_agent: String,
     utm: String,
     guest_name: String,
     auth_id: String,
