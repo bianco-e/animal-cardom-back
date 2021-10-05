@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(routes);
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Animal Cardom");
+  res.send("Animal Cardom API");
 });
 
 mongoose.connect(DB_URL, {

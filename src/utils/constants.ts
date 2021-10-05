@@ -7,7 +7,7 @@ const INITIAL_ANIMALS = [
 ];
 
 export const NEW_USER_TEMPLATE = {
-  coins: 0,
+  coins: 25,
   xp: 0,
   owned_cards: INITIAL_ANIMALS,
   hand: INITIAL_ANIMALS,

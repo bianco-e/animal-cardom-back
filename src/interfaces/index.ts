@@ -25,8 +25,15 @@ export interface IFeedback extends Document {
   created_at: string;
 }
 
+export interface SortedActions {
+  "visit-landing": IAction[];
+  "play-as-guest-button": IAction[];
+  "sign-in-button": IAction[];
+  "you-are-allowed-button": IAction[];
+}
+
 export interface IAction extends Document {
-  action: string;
+  action: keyof SortedActions;
   utm: string;
   guest_name: string;
   auth_id: string;
