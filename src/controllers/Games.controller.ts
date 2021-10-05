@@ -7,7 +7,7 @@ import { GameModel as Game } from "../models/Game";
 import { defaultOkResponse, responseHandler } from "../utils/defaultResponses";
 import { campaignPcAnimals } from "../utils/constants";
 import log from "../utils/logger";
-import { IAnimal, IGame, IUser } from "../interfaces";
+import { IAnimal, IGame } from "../interfaces";
 import { getTimeStamp } from "../utils";
 
 export class GamesController {
