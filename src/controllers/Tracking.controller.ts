@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { CallbackError } from "mongoose";
-import { IAction, SortedActions } from "../interfaces";
+import { IAction } from "../interfaces";
 import Action from "../models/Action";
 import { getTimeStamp } from "../utils";
 import { responseHandler } from "../utils/defaultResponses";
@@ -17,20 +17,16 @@ export class TrackingController {
   }
 
   static async getActionsStats(req: Request, res: Response) {
-    Action.find({}).exec((err: CallbackError, actions: IAction[]) => {
-      const actionsToReturn: SortedActions = actions.reduce(
-        (acc: SortedActions, curr: IAction) => {
-          const currentKey: keyof SortedActions = curr.action;
-          return { ...acc, [currentKey]: acc[currentKey].concat(curr) };
+    Action.aggregate([
+      {
+        $group: {
+          _id: "$action",
+          actions: { $push: "$$ROOT" },
         },
-        {
-          "visit-landing": [],
-          "play-as-guest-button": [],
-          "sign-in-button": [],
-          "you-are-allowed-button": [],
-        }
-      );
-      responseHandler(res, err, actionsToReturn, "Error getting all actions");
+      },
+    ]).exec((err: CallbackError, actions) => {
+      console.log(actions);
+      responseHandler(res, err, actions, "Error getting all actions");
     });
   }
 }
