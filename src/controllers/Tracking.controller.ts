@@ -25,7 +25,6 @@ export class TrackingController {
         },
       },
     ]).exec((err: CallbackError, actions) => {
-      console.log(actions);
       responseHandler(res, err, actions, "Error getting all actions");
     });
   }
