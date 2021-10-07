@@ -16,16 +16,37 @@ export class TrackingController {
     });
   }
 
-  static async getActionsStats(req: Request, res: Response) {
-    Action.aggregate([
-      {
-        $group: {
-          _id: "$action",
-          actions: { $push: "$$ROOT" },
+  static async getAllActionsStats(req: Request, res: Response) {
+    const { sort_by, order } = req.query;
+    const orderKey = !order || order === "desc" ? -1 : order === "asc" && 1;
+
+    if (sort_by === "actions") {
+      Action.aggregate([
+        {
+          $group: {
+            _id: "$action",
+            actions: { $push: "$$ROOT" },
+          },
         },
-      },
-    ]).exec((err: CallbackError, actions) => {
-      responseHandler(res, err, actions, "Error getting all actions");
-    });
+      ]).exec((err: CallbackError, actions) => {
+        responseHandler(
+          res,
+          err,
+          actions,
+          "Error getting all tracking stats by actions"
+        );
+      });
+    } else {
+      Action.find({})
+        .sort([[sort_by, orderKey]])
+        .exec((err: CallbackError, actions) => {
+          responseHandler(
+            res,
+            err,
+            actions,
+            `Error getting all actions sorted by ${sort_by} in ${order} order`
+          );
+        });
+    }
   }
 }
