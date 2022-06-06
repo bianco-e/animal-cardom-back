@@ -19,6 +19,7 @@ const AnimalCardSchema = new Schema<IAnimal>(
     targeteable: Boolean,
     bleeding: Boolean,
     price: Number,
+    missing_chance: Number,
   },
   { collection: "animals", versionKey: false }
 );
