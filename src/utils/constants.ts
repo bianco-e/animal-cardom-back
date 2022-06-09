@@ -1,7 +1,7 @@
 const INITIAL_ANIMALS = [
   "Alligator",
   "Basilisk Lizard",
-  "Little Lion",
+  "Spider",
   "Octopus",
   "Vulture",
 ];
@@ -121,6 +121,6 @@ export const campaignPcAnimals: { [x: number]: string[] } = {
     "Bear",
     "Orc",
     "Shark",
-    "Little Lion",
+    "Alligator",
   ],
 };
