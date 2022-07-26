@@ -39,14 +39,14 @@ export interface IGame extends Document {
     created_at: string;
     earned_animal: string;
     terrain: string;
-    coins_earned: number;
-    xp_earned: number;
+    earned_coins: number;
+    earned_xp: number;
     won: boolean;
-    usedAnimals: {
+    used_animals: {
       user: { name: string; survived: boolean }[];
       pc: { name: string; survived: boolean }[];
     };
-    usedPlants: {
+    used_plants: {
       user: { name: string; applied: boolean }[];
       pc: { name: string; applied: boolean }[];
     };

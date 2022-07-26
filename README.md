@@ -6,6 +6,8 @@
 
 - GET `/animals/all` - Returns an array with all existing animals
 
+- GET `/animals/{NAME}` - Returns a single animal by NAME
+
 - GET `/animals/all/statistics` - Returns an object with all existing animals statistics, total quantity, quantity by species, etc.
 
 - GET `/animals/newest` - Returns an array with the newest 3 animals
@@ -71,6 +73,8 @@ Receives an array of objects with the structure of an plant as body
 - GET `/terrains/all` - Returns an array with all existing terrains
 
 - GET `/terrains/new` - Returns a random terrain
+
+- GET `/terrains/new?xp={XP}` - Returns the terrain associated to current xp for campaign
 
 - POST `/terrains/create-many` - Creates many new terrains
 

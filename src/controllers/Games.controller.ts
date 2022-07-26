@@ -5,7 +5,7 @@ import PlantCard from "../models/PlantCard";
 import User from "../models/User";
 import { GameModel as Game } from "../models/Game";
 import { defaultOkResponse, responseHandler } from "../utils/defaultResponses";
-import { campaignPcAnimals } from "../utils/constants";
+import { CAMPAIGN_GAMES, CAMPAIGN_REWARDS } from "../utils/constants";
 import log from "../utils/logger";
 import { IAnimal, IGame } from "../interfaces";
 import { getTimeStamp } from "../utils";
@@ -56,9 +56,9 @@ export class GamesController {
               "Error getting random initial plants",
               JSON.stringify(plantsErr)
             );
-          const pcFilteredAnimals = campaignPcAnimals[parsedXp]
-            .filter((animal: string) => !userCards.includes(animal))
-            .slice(0, 5);
+          const pcFilteredAnimals = CAMPAIGN_GAMES[parsedXp].PC_ANIMALS.filter(
+            (animal: string) => !userCards.includes(animal)
+          ).slice(0, 5);
 
           AnimalCard.find({
             name: { $in: pcFilteredAnimals },
@@ -95,16 +95,13 @@ export class GamesController {
   }
 
   static async saveGame(req: Request, res: Response) {
-    const { game, auth_id } = req.body;
-    const { coins_earned, xp_earned, earned_animal, usedAnimals, usedPlants } =
-      game;
-    if (
-      auth_id &&
-      xp_earned !== undefined &&
-      coins_earned !== undefined &&
-      usedAnimals &&
-      usedPlants
-    ) {
+    const { game, auth_id, current_xp } = req.body;
+    const { used_animals, used_plants, won } = game;
+    const earned_xp: number = won ? CAMPAIGN_REWARDS[current_xp].xp : 0;
+    const earned_coins: number = won ? CAMPAIGN_REWARDS[current_xp].coins : 1;
+    const earned_animal: string | null = won ? CAMPAIGN_REWARDS[current_xp].animal : null;
+
+    if (auth_id && used_animals && used_plants) {
       const session = await startSession();
       try {
         let transactionResult = null;
@@ -123,21 +120,22 @@ export class GamesController {
 
             const user = await User.findOne({ auth_id }).select("owned_cards");
             if (!user) throw new Error("User does not exist");
-            const userOwnsCard =
+            const isCardOwned =
               earned_animal && user?.owned_cards.includes(earned_animal);
             const updatedUser = await User.findOneAndUpdate(
               { auth_id },
               {
-                $inc: { coins: coins_earned, xp: xp_earned },
-                ...(!userOwnsCard
+                $inc: { coins: earned_coins, xp: earned_xp },
+                ...(earned_animal && !isCardOwned
                   ? { $push: { owned_cards: earned_animal } }
                   : {}),
               },
               { new: true, session }
             );
             transactionResult = {
-              xp: updatedUser?.xp,
+              current_xp: updatedUser?.xp,
               earned_animal,
+              earned_coins,
             };
           } catch (e) {
             return abort(`Error saving last game ${JSON.stringify(e)}`);
@@ -148,9 +146,7 @@ export class GamesController {
           res.status(200).send(transactionResult);
         } else {
           log.error(`Transaction intentionally aborted`);
-          res
-            .status(500)
-            .send(`Transaction intentionally aborted. See error log`);
+          res.status(500).send(`Transaction intentionally aborted. See error log`);
         }
       } catch (e) {
         log.error(`Transaction aborted due to an unexpected error: ${e}`);

@@ -9,14 +9,14 @@ export const GameSchema = new Schema<IGame>(
         created_at: Date,
         earned_animal: String,
         terrain: String,
-        coins_earned: Number,
-        xp_earned: Number,
+        earned_coins: Number,
+        earned_xp: Number,
         won: Boolean,
-        usedAnimals: {
+        used_animals: {
           user: [{ name: String, survived: Boolean }],
           pc: [{ name: String, survived: Boolean }],
         },
-        usedPlants: {
+        used_plants: {
           user: [{ name: String, applied: Boolean }],
           pc: [{ name: String, applied: Boolean }],
         },
