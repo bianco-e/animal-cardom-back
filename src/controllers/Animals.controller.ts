@@ -3,7 +3,11 @@ import { CallbackError } from "mongoose";
 import { IAnimal } from "../interfaces";
 import AnimalCard from "../models/AnimalCard";
 import { getTimeStamp } from "../utils";
-import { defaultOkResponse, responseHandler } from "../utils/defaultResponses";
+import {
+  defaultErrorResponse,
+  defaultOkResponse,
+  responseHandler,
+} from "../utils/defaultResponses";
 import log from "../utils/logger";
 
 export class AnimalsController {
@@ -105,8 +109,7 @@ export class AnimalsController {
 
   static async getFilteredAnimals(req: Request, res: Response) {
     const { species, owned, skill_type, owned_to_filter } = req.query;
-    const parseStringToArray = (string: any): string[] =>
-      string.toString().split(";");
+    const parseStringToArray = (string: any): string[] => string.toString().split(";");
     AnimalCard.find({
       ...(owned
         ? { name: { $in: parseStringToArray(owned) } }
@@ -120,18 +123,29 @@ export class AnimalsController {
     });
   }
 
+  static async getAnimalByName(req: Request, res: Response) {
+    const { name } = req.params;
+    if (!name) return defaultErrorResponse(res, "No animal received");
+    AnimalCard.findOne({
+      name: { $regex: name.toString(), $options: "i" },
+    }).exec((err: CallbackError, animal: IAnimal | null) => {
+      responseHandler(
+        res,
+        err,
+        animal,
+        `Error getting requested animal: ${req.query.name}`,
+        "Animal does not exist"
+      );
+    });
+  }
+
   static async createAnimal(req: Request, res: Response) {
     const newCard = new AnimalCard({
       ...req.body,
       created_at: getTimeStamp(),
     });
     newCard.save((err: CallbackError, createdAnimalCard: IAnimal) => {
-      responseHandler(
-        res,
-        err,
-        createdAnimalCard,
-        "Error creating new animal card"
-      );
+      responseHandler(res, err, createdAnimalCard, "Error creating new animal card");
     });
   }
 
