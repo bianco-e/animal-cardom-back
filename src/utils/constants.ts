@@ -100,7 +100,7 @@ export const CAMPAIGN_GAMES: {
       "Eagle",
       "Frog",
     ],
-    TERRAIN: "dessert",
+    TERRAIN: "desert",
   },
   [CAMPAIGN_CIRCUIT_XP[5]]: {
     PC_ANIMALS: [

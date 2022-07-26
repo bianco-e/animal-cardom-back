@@ -46,60 +46,62 @@ export class GamesController {
 
   static async getNewCampaign(req: Request, res: Response) {
     const { xp, user_cards } = req.query;
-    if (xp !== undefined && user_cards) {
-      const parsedXp: number = parseInt(xp!.toString());
-      const userCards: string[] = user_cards.toString().split(";");
-      PlantCard.aggregate([{ $sample: { size: 6 } }]).exec(
-        (plantsErr: Error, plantsDocs: Document[]) => {
-          if (plantsErr)
-            return log.error(
-              "Error getting random initial plants",
-              JSON.stringify(plantsErr)
-            );
-          const pcFilteredAnimals = CAMPAIGN_GAMES[parsedXp].PC_ANIMALS.filter(
-            (animal: string) => !userCards.includes(animal)
-          ).slice(0, 5);
+    if (!xp || !user_cards) return;
+    const parsedXp: number = parseInt(xp!.toString());
+    const userCards: string[] = user_cards.toString().split(";");
+    PlantCard.aggregate([{ $sample: { size: 6 } }]).exec(
+      (plantsErr: Error, plantsDocs: Document[]) => {
+        if (plantsErr)
+          return log.error(
+            "Error getting random initial plants",
+            JSON.stringify(plantsErr)
+          );
+        const pcFilteredAnimals = CAMPAIGN_GAMES[parsedXp].PC_ANIMALS.filter(
+          (animal: string) => !userCards.includes(animal)
+        ).slice(0, 5);
 
+        AnimalCard.find({
+          name: { $in: pcFilteredAnimals },
+        }).exec((pcAnimalsErr: CallbackError, pcAnimals: IAnimal[]) => {
+          if (pcAnimalsErr)
+            return log.error(
+              "Error getting pc initial hand for campaign",
+              JSON.stringify(pcAnimalsErr)
+            );
           AnimalCard.find({
-            name: { $in: pcFilteredAnimals },
-          }).exec((pcAnimalsErr: CallbackError, pcAnimals: IAnimal[]) => {
-            if (pcAnimalsErr)
+            name: { $in: userCards },
+          }).exec((userAnimalsErr: CallbackError, userAnimals: IAnimal[]) => {
+            if (userAnimalsErr)
               return log.error(
                 "Error getting pc initial hand for campaign",
-                JSON.stringify(pcAnimalsErr)
+                JSON.stringify(userAnimalsErr)
               );
-            AnimalCard.find({
-              name: { $in: userCards },
-            }).exec((userAnimalsErr: CallbackError, userAnimals: IAnimal[]) => {
-              if (userAnimalsErr)
-                return log.error(
-                  "Error getting pc initial hand for campaign",
-                  JSON.stringify(userAnimalsErr)
-                );
-              const response = {
-                user: {
-                  animals: userAnimals,
-                  plants: plantsDocs.slice(0, 3),
-                },
-                pc: {
-                  animals: pcAnimals,
-                  plants: plantsDocs.slice(3),
-                },
-              };
-              defaultOkResponse(res, response);
-            });
+            const response = {
+              user: {
+                animals: userAnimals,
+                plants: plantsDocs.slice(0, 3),
+              },
+              pc: {
+                animals: pcAnimals,
+                plants: plantsDocs.slice(3),
+              },
+            };
+            defaultOkResponse(res, response);
           });
-        }
-      );
-    }
+        });
+      }
+    );
   }
 
   static async saveGame(req: Request, res: Response) {
-    const { game, auth_id, current_xp } = req.body;
+    const { game, auth_id, current_xp, required_xp } = req.body;
     const { used_animals, used_plants, won } = game;
-    const earned_xp: number = won ? CAMPAIGN_REWARDS[current_xp].xp : 0;
+    const firstTimeWon = won && current_xp === required_xp;
+    const earned_xp: number = firstTimeWon ? CAMPAIGN_REWARDS[current_xp].xp : 0;
     const earned_coins: number = won ? CAMPAIGN_REWARDS[current_xp].coins : 1;
-    const earned_animal: string | null = won ? CAMPAIGN_REWARDS[current_xp].animal : null;
+    const earned_animal: string | null = firstTimeWon
+      ? CAMPAIGN_REWARDS[current_xp].animal
+      : null;
 
     if (auth_id && used_animals && used_plants) {
       const session = await startSession();
