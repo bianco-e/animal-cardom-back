@@ -113,7 +113,7 @@ export class GamesController {
           try {
             await Game.updateOne(
               { auth_id },
-              { $push: { games: { ...game, created_at: getTimeStamp() } } },
+              { $push: { games: { ...game, earned_xp, created_at: getTimeStamp() } } },
               { new: true, session, upsert: true }
             );
 
