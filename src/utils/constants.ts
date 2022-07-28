@@ -8,6 +8,7 @@ export const NEW_USER_TEMPLATE = {
   owned_cards: INITIAL_ANIMALS,
   hand: INITIAL_ANIMALS,
   preferences: { language: "en" },
+  role: "USER",
 };
 
 export const CAMPAIGN_REWARDS: {

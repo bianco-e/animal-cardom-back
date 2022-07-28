@@ -4,14 +4,31 @@ import { IUser } from "../interfaces";
 import User from "../models/User";
 import { GameModel as Game } from "../models/Game";
 import { NEW_USER_TEMPLATE } from "../utils/constants";
-import { responseHandler } from "../utils/defaultResponses";
+import { defaultErrorResponse, responseHandler } from "../utils/defaultResponses";
+import jwt from "jsonwebtoken";
 import log from "../utils/logger";
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export class UsersController {
   static async createUser(req: Request, res: Response) {
-    const newUser = new User({ ...req.body, ...NEW_USER_TEMPLATE });
-    newUser.save((err: CallbackError, createdUser: IUser) => {
-      responseHandler(res, err, createdUser, "Error creating new user");
+    const { auth_id, email } = req.body;
+    User.findOne({ auth_id, email }, (err: CallbackError, user: IUser | null) => {
+      if (user)
+        return defaultErrorResponse(res, "user_exists", "The user already exists");
+      const newUser = new User({ ...req.body, ...NEW_USER_TEMPLATE });
+      newUser.save((err: CallbackError, createdUser: IUser) => {
+        if (!JWT_SECRET) return defaultErrorResponse(res, "unset_environment");
+        const token = jwt.sign({ email, role: createdUser.role }, JWT_SECRET, {
+          expiresIn: 21600, //6h
+        });
+        responseHandler(
+          res,
+          err,
+          { user: createdUser, token },
+          "Error creating new user"
+        );
+      });
     });
   }
 
@@ -46,9 +63,7 @@ export class UsersController {
         res.status(200).send(`${auth_id} user has been reset`);
       } else {
         log.error(`Transaction intentionally aborted`);
-        res
-          .status(500)
-          .send(`Transaction intentionally aborted. See error log`);
+        res.status(500).send(`Transaction intentionally aborted. See error log`);
       }
     } catch (e) {
       log.error(`Transaction aborted due to an unexpected error: ${e}`);
@@ -61,13 +76,7 @@ export class UsersController {
   static async getUserMe(req: Request, res: Response) {
     const { auth_id } = req.body;
     User.findOne({ auth_id }, (err: CallbackError, userMe: IUser | null) => {
-      responseHandler(
-        res,
-        err,
-        userMe,
-        "Error getting user data",
-        "User not found"
-      );
+      responseHandler(res, err, userMe, "Error getting user data", "User not found");
     });
   }
 
@@ -130,13 +139,7 @@ export class UsersController {
       { $push: { owned_cards: new_card }, $inc: { coins: -price } },
       { new: true, upsert: true }
     ).exec((err: CallbackError) => {
-      responseHandler(
-        res,
-        err,
-        { new_card },
-        "Error buying new card",
-        "User not found"
-      );
+      responseHandler(res, err, { new_card }, "Error buying new card", "User not found");
     });
   }
 }

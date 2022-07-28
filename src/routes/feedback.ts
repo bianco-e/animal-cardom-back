@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { FeedbackControllers } from "../controllers/Feedback.controller";
-const router: Router = Router();
+const feedbackRouter: Router = Router();
 
-router.post("/give", FeedbackControllers.giveFeedback);
+feedbackRouter.post("/give", FeedbackControllers.giveFeedback);
 
-export default router;
+export default feedbackRouter;

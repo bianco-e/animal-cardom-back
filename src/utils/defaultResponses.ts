@@ -13,7 +13,7 @@ export const defaultErrorResponse = (
   message?: string
 ) => {
   log.error(`${message ? `Message: ${message} | ` : ""}Error: ${error}`);
-  res.status(400).send({ message, error });
+  res.status(400).send({ message, error, ok: false });
   res.end();
 };
 

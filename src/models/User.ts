@@ -16,6 +16,7 @@ const UserSchema = new Schema<IUser>(
     preferences: {
       language: String,
     },
+    role: String,
   },
   { collection: "users", versionKey: false }
 );

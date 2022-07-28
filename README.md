@@ -38,7 +38,7 @@ Receives an object with name (optional) and message properties as body
 
 - GET `/games/new-random` - Returns an object with user and pc properties, where each one has an array of random animals and an array of random plants
 
-- GET `/games/new-campaign` - Returns an object with user and pc properties, where each one has an array of animals and an array of plants according to `xp` (which identifies the current level) and `user_cards` (which makes not to return a repeated animal) params
+- POST `/games/new-campaign` - Returns an object with user and pc properties, where each one has an array of animals and an array of plants according to `xp` (which identifies the current level) and `user_cards` (which makes not to return a repeated animal) params
 
 - POST `/games/save-game` - Saves last campaign game
 
