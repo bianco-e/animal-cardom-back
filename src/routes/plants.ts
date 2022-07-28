@@ -1,9 +1,13 @@
 import { Router } from "express";
 import { PlantsController } from "../controllers/Plants.controller";
-const router: Router = Router();
+import { validateAdmin } from "../utils/middlewares";
+const plantsRouter: Router = Router();
 
-router.get("/all", PlantsController.getAllPlants);
-router.post("/create", PlantsController.createPlant);
-router.post("/create-many", PlantsController.createManyPlants);
+plantsRouter.get("/all", PlantsController.getAllPlants);
 
-export default router;
+//ADMIN ROUTES
+plantsRouter.use(validateAdmin);
+plantsRouter.post("/create", PlantsController.createPlant);
+plantsRouter.post("/create-many", PlantsController.createManyPlants);
+
+export default plantsRouter;

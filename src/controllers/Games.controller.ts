@@ -45,10 +45,7 @@ export class GamesController {
   }
 
   static async getNewCampaign(req: Request, res: Response) {
-    const { xp, user_cards } = req.query;
-    if (!xp || !user_cards) return;
-    const parsedXp: number = parseInt(xp!.toString());
-    const userCards: string[] = user_cards.toString().split(";");
+    const { xp, user_cards }: { xp: number; user_cards: string[] } = req.body;
     PlantCard.aggregate([{ $sample: { size: 6 } }]).exec(
       (plantsErr: Error, plantsDocs: Document[]) => {
         if (plantsErr)
@@ -56,8 +53,8 @@ export class GamesController {
             "Error getting random initial plants",
             JSON.stringify(plantsErr)
           );
-        const pcFilteredAnimals = CAMPAIGN_GAMES[parsedXp].PC_ANIMALS.filter(
-          (animal: string) => !userCards.includes(animal)
+        const pcFilteredAnimals = CAMPAIGN_GAMES[xp].PC_ANIMALS.filter(
+          (animal: string) => !user_cards.includes(animal)
         ).slice(0, 5);
 
         AnimalCard.find({
@@ -69,7 +66,7 @@ export class GamesController {
               JSON.stringify(pcAnimalsErr)
             );
           AnimalCard.find({
-            name: { $in: userCards },
+            name: { $in: user_cards },
           }).exec((userAnimalsErr: CallbackError, userAnimals: IAnimal[]) => {
             if (userAnimalsErr)
               return log.error(
@@ -116,7 +113,7 @@ export class GamesController {
           try {
             await Game.updateOne(
               { auth_id },
-              { $push: { games: { ...game, created_at: getTimeStamp() } } },
+              { $push: { games: { ...game, earned_xp, created_at: getTimeStamp() } } },
               { new: true, session, upsert: true }
             );
 

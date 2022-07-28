@@ -81,4 +81,5 @@ export interface IUser extends Document {
   preferences: {
     language: string;
   };
+  role: string;
 }

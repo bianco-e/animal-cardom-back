@@ -1,13 +1,17 @@
 import { Router } from "express";
 import { AnimalsController } from "../controllers/Animals.controller";
-const router: Router = Router();
+import { validateAdmin } from "../utils/middlewares";
+const animalsRouter: Router = Router();
 
-router.get("/all", AnimalsController.getAllAnimals);
-router.get("/name/:name", AnimalsController.getAnimalByName);
-router.get("/all/statistics", AnimalsController.getAllAnimalsStatistics);
-router.get("/newest", AnimalsController.getNewestAnimals);
-router.get("/filter", AnimalsController.getFilteredAnimals);
-router.post("/create", AnimalsController.createAnimal);
-router.post("/create-many", AnimalsController.createManyAnimals);
+animalsRouter.get("/all", AnimalsController.getAllAnimals);
+animalsRouter.get("/name/:name", AnimalsController.getAnimalByName);
+animalsRouter.get("/all/statistics", AnimalsController.getAllAnimalsStatistics);
+animalsRouter.get("/newest", AnimalsController.getNewestAnimals);
+animalsRouter.get("/filter", AnimalsController.getFilteredAnimals);
 
-export default router;
+//ADMIN ROUTES
+animalsRouter.use(validateAdmin);
+animalsRouter.post("/create", AnimalsController.createAnimal);
+animalsRouter.post("/create-many", AnimalsController.createManyAnimals);
+
+export default animalsRouter;

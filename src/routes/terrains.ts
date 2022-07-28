@@ -1,9 +1,13 @@
 import { Router } from "express";
 import { TerrainsController } from "../controllers/Terrains.controller";
-const router: Router = Router();
+import { validateAdmin } from "../utils/middlewares";
+const terrainsRouter: Router = Router();
 
-router.get("/all", TerrainsController.getAllTerrains);
-router.get("/new", TerrainsController.getNewTerrain);
-router.post("/create-many", TerrainsController.createManyTerrains);
+terrainsRouter.get("/all", TerrainsController.getAllTerrains);
+terrainsRouter.get("/new", TerrainsController.getNewTerrain);
 
-export default router;
+//ADMIN ROUTES
+terrainsRouter.use(validateAdmin);
+terrainsRouter.post("/create-many", TerrainsController.createManyTerrains);
+
+export default terrainsRouter;
