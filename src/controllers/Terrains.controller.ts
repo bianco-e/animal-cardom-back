@@ -2,15 +2,16 @@ import { Request, Response } from "express";
 import { CallbackError } from "mongoose";
 import { ITerrain } from "../interfaces";
 import Terrain from "../models/Terrain";
-import { CAMPAIGN_GAMES } from "../utils/constants";
 import { defaultOkResponse, responseHandler } from "../utils/defaultResponses";
 import log from "../utils/logger";
 
 export class TerrainsController {
   static async getAllTerrains(req: Request, res: Response) {
-    Terrain.find({}).exec((err: CallbackError, terrains: ITerrain[]) => {
-      responseHandler(res, err, { terrains }, "Error getting all terrains");
-    });
+    Terrain.find({})
+      .sort({ campaign_xp: "asc" })
+      .exec((err: CallbackError, terrains: ITerrain[]) => {
+        responseHandler(res, err, { terrains }, "Error getting all terrains");
+      });
   }
 
   static async getNewTerrain(req: Request, res: Response) {
@@ -36,22 +37,21 @@ export class TerrainsController {
           byNameErr,
           terrain,
           `Error getting ${req.query.name} terrain`,
-          "Terrain does not exist"
+          "Terrain does not match the name"
         );
       });
     }
     if (xp) {
       const parsedXp: number = parseInt(xp.toString());
-      const terrainName = CAMPAIGN_GAMES[parsedXp].TERRAIN;
       return Terrain.findOne({
-        name: { $regex: terrainName, $options: "i" },
+        campaign_xp: { $in: parsedXp },
       }).exec((byNameErr: CallbackError, terrain: ITerrain | null) => {
         responseHandler(
           res,
           byNameErr,
           terrain,
           `Error getting ${req.query.name} terrain`,
-          "Terrain does not exist"
+          "Terrain does not match that xp"
         );
       });
     }

@@ -7,6 +7,7 @@ const TerrainSchema = new Schema<ITerrain>(
     image: String,
     name: String,
     color: String,
+    campaign_xp: [Number],
   },
   { collection: "terrains", versionKey: false }
 );

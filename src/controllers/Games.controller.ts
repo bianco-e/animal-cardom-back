@@ -53,9 +53,9 @@ export class GamesController {
             "Error getting random initial plants",
             JSON.stringify(plantsErr)
           );
-        const pcFilteredAnimals = CAMPAIGN_GAMES[xp].PC_ANIMALS.filter(
-          (animal: string) => !user_cards.includes(animal)
-        ).slice(0, 5);
+        const pcFilteredAnimals = CAMPAIGN_GAMES[xp]
+          .filter((animal: string) => !user_cards.includes(animal))
+          .slice(0, 5);
 
         AnimalCard.find({
           name: { $in: pcFilteredAnimals },

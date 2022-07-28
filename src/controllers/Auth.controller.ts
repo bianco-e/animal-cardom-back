@@ -34,11 +34,10 @@ export class AuthController {
     const token = getBearer(req.headers.authorization);
     if (!token) return res.status(401).send({ error: "Unauthorized - NT" });
     jwt.verify(token, JWT_SECRET, (err: any, decoded: any) => {
-      if (err) return res.status(401).send({ ...err, ok: false });
+      if (err) return res.status(401).send({ ...err });
       res.json({
         expires: decoded.exp,
         is_valid: true,
-        ok: true,
       });
     });
   }
