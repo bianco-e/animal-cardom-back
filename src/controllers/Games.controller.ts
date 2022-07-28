@@ -135,6 +135,7 @@ export class GamesController {
               current_xp: updatedUser?.xp,
               earned_animal,
               earned_coins,
+              current_coins: updatedUser?.coins,
             };
           } catch (e) {
             return abort(`Error saving last game ${JSON.stringify(e)}`);
