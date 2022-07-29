@@ -11,10 +11,10 @@ userRouter.post("/me", UsersController.getUserMe);
 userRouter.post("/profile", UsersController.getUserProfile);
 userRouter.post("/animal_purchase", UsersController.purchaseAnimal);
 userRouter.post("/hand/update", UsersController.updateUserHand);
-userRouter.post("/owned_cards/add", UsersController.addCardToUserOwnedCards);
 
 //ADMIN ROUTES
 userRouter.use(validateAdmin);
 userRouter.post("/reset", UsersController.resetUser);
+userRouter.post("/owned_cards/add", UsersController.addCardToUserOwnedCards);
 
 export default userRouter;

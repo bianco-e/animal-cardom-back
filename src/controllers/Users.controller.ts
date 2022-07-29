@@ -101,6 +101,11 @@ export class UsersController {
 
   static async updateUserHand(req: Request, res: Response) {
     const { auth_id, hand } = req.body;
+    const user = await User.findOne({ auth_id }).select("owned_cards");
+    if (!hand.every((card: string) => user?.owned_cards.includes(card)))
+      return res
+        .status(403)
+        .send({ error: true, errMsg: "Cards to add are not owned by user" });
     User.findOneAndUpdate({ auth_id }, { hand }, { new: true }).exec(
       (err: CallbackError, newUser: IUser | null) => {
         responseHandler(
@@ -134,6 +139,13 @@ export class UsersController {
 
   static async purchaseAnimal(req: Request, res: Response) {
     const { auth_id, new_card, price } = req.body;
+    const user = await User.findOne({ auth_id }).select("coins");
+    if (!user)
+      return res.status(403).send({ error: true, errMsg: "User does not exist" });
+    if (user.coins < price)
+      return res
+        .status(403)
+        .send({ error: true, errMsg: "Not enough coins to buy this animal" });
     User.updateOne(
       { auth_id },
       { $push: { owned_cards: new_card }, $inc: { coins: -price } },
