@@ -17,6 +17,7 @@ export interface IAnimal extends Document {
   targeteable: boolean;
   bleeding: boolean;
   price: number;
+  sell_price: number;
 }
 
 export interface IFeedback extends Document {

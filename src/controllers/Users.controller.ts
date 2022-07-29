@@ -7,6 +7,7 @@ import { NEW_USER_TEMPLATE } from "../utils/constants";
 import { defaultErrorResponse, responseHandler } from "../utils/defaultResponses";
 import jwt from "jsonwebtoken";
 import log from "../utils/logger";
+import AnimalCard from "../models/AnimalCard";
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -152,6 +153,39 @@ export class UsersController {
       { new: true, upsert: true }
     ).exec((err: CallbackError) => {
       responseHandler(res, err, { new_card }, "Error buying new card", "User not found");
+    });
+  }
+
+  static async sellAnimal(req: Request, res: Response) {
+    const { auth_id, card_to_sell } = req.body;
+    const user = await User.findOne({ auth_id }).select(["owned_cards", "hand"]);
+    if (!user) return res.status(403).send({ error: true, errMsg: "Inexistent user" });
+    const card = await AnimalCard.findOne({
+      name: { $regex: card_to_sell, $options: "i" },
+    }).select("price");
+    if (!card) return res.status(403).send({ error: true, errMsg: "Inexistent card" });
+    if (!user.owned_cards.includes(card_to_sell))
+      return res.status(403).send({ error: true, errMsg: "Card not owned by user" });
+    if (user.owned_cards.length <= 5)
+      return res
+        .status(403)
+        .send({ error: true, errMsg: "User cannot have less than 5 cards" });
+    if (user.hand.includes(card_to_sell))
+      return res.status(403).send({ error: true, errMsg: "Card in hand cannot be sold" });
+    User.findOneAndUpdate(
+      { auth_id },
+      { $pull: { owned_cards: card_to_sell }, $inc: { coins: card.sell_price } },
+      { new: true, upsert: true }
+    ).exec((err: CallbackError, newUser: IUser | null) => {
+      responseHandler(
+        res,
+        err,
+        {
+          current_coins: newUser?.coins,
+        },
+        "Error buying new card",
+        "User not found"
+      );
     });
   }
 }

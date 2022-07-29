@@ -11,6 +11,7 @@ userRouter.post("/me", UsersController.getUserMe);
 userRouter.post("/profile", UsersController.getUserProfile);
 userRouter.post("/animal_purchase", UsersController.purchaseAnimal);
 userRouter.post("/hand/update", UsersController.updateUserHand);
+userRouter.post("/animal_sell", UsersController.sellAnimal);
 
 //ADMIN ROUTES
 userRouter.use(validateAdmin);

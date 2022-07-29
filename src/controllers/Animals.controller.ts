@@ -142,6 +142,7 @@ export class AnimalsController {
   static async createAnimal(req: Request, res: Response) {
     const newCard = new AnimalCard({
       ...req.body,
+      sell_price: Math.ceil(req.body.price / 2),
       created_at: getTimeStamp(),
     });
     newCard.save((err: CallbackError, createdAnimalCard: IAnimal) => {
@@ -152,6 +153,7 @@ export class AnimalsController {
   static async createManyAnimals(req: Request, res: Response) {
     const cardsArray = req.body.map((card: IAnimal) => ({
       ...card,
+      sell_price: Math.ceil(req.body.price / 2),
       created_at: getTimeStamp(),
     }));
     AnimalCard.create(cardsArray)
@@ -162,4 +164,21 @@ export class AnimalsController {
         log.error("Error creating many animals cards", JSON.stringify(err))
       );
   }
+
+  /*   static async updateManyAnimals(req: Request, res: Response) {
+    const animals = await AnimalCard.find({}).select(["name", "price"]);
+    if (!animals) return;
+    await AnimalCard.bulkWrite(
+      animals.map((a) => {
+        return {
+          updateOne: {
+            filter: { name: a.name },
+            update: { $set: { sell_price: Math.ceil(a.price / 2) || 0 } },
+            options: { multi: true },
+          },
+        };
+      })
+    );
+    res.status(200).send("OK");
+  } */
 }
