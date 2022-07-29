@@ -162,7 +162,7 @@ export class UsersController {
     if (!user) return res.status(403).send({ error: true, errMsg: "Inexistent user" });
     const card = await AnimalCard.findOne({
       name: { $regex: card_to_sell, $options: "i" },
-    }).select("price");
+    }).select("sell_price");
     if (!card) return res.status(403).send({ error: true, errMsg: "Inexistent card" });
     if (!user.owned_cards.includes(card_to_sell))
       return res.status(403).send({ error: true, errMsg: "Card not owned by user" });
@@ -181,9 +181,10 @@ export class UsersController {
         res,
         err,
         {
+          error: false,
           current_coins: newUser?.coins,
         },
-        "Error buying new card",
+        "Error selling card",
         "User not found"
       );
     });
