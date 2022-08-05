@@ -20,7 +20,10 @@ const AnimalCardSchema = new Schema<IAnimal>(
     bleeding: Boolean,
     price: Number,
     sell_price: Number,
-    missing_chance: Number,
+    missing: {
+      chance: Number,
+      exceptions: [String],
+    },
   },
   { collection: "animals", versionKey: false }
 );
