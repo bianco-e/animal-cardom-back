@@ -6,7 +6,6 @@ const AnimalCardSchema = new Schema<IAnimal>(
     created_at: Date,
     name: String,
     species: String,
-    image: String,
     skill: {
       name: String,
       description: String,

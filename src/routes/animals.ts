@@ -13,5 +13,6 @@ animalsRouter.get("/filter", AnimalsController.getFilteredAnimals);
 animalsRouter.use(validateAdmin);
 animalsRouter.post("/create", AnimalsController.createAnimal);
 animalsRouter.post("/create-many", AnimalsController.createManyAnimals);
+//animalsRouter.post("/update-many", AnimalsController.updateManyAnimals);
 
 export default animalsRouter;
