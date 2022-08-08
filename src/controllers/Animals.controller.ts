@@ -10,6 +10,53 @@ import {
 } from "../utils/defaultResponses";
 import log from "../utils/logger";
 
+const getAnimalsBy = (animals: IAnimal[], by: "habitat" | "species") => {
+  return animals.reduce(
+    (
+      acc: {
+        [x: string]: {
+          count: number;
+          highest_attack?: { name: string; attack: number };
+          highest_life?: { name: string; life: number };
+        };
+      },
+      currentAnimal: IAnimal
+    ) => {
+      const currElement = acc[currentAnimal[by]];
+      const addHighestAttack =
+        !currElement ||
+        !currElement.highest_attack ||
+        currElement.highest_attack.attack < currentAnimal.attack.initial;
+      const addHighestLife =
+        !currElement ||
+        !currElement.highest_life ||
+        currElement.highest_life.life < currentAnimal.life.initial;
+
+      return {
+        ...acc,
+        [currentAnimal[by]]: {
+          ...currElement,
+          count: (currElement ? currElement.count : 0) + 1,
+          ...(addHighestAttack
+            ? {
+                highest_attack: {
+                  name: currentAnimal.name,
+                  attack: currentAnimal.attack.initial,
+                },
+              }
+            : {}),
+          ...(addHighestLife
+            ? {
+                highest_life: { name: currentAnimal.name, life: currentAnimal.life.initial },
+              }
+            : {}),
+        },
+      };
+    },
+    {}
+  );
+};
+
 export class AnimalsController {
   static async getAllAnimals(req: Request, res: Response) {
     AnimalCard.find({}).exec((err: CallbackError, animals: IAnimal[]) => {
@@ -19,81 +66,13 @@ export class AnimalsController {
 
   static async getAllAnimalsStatistics(req: Request, res: Response) {
     AnimalCard.find({}).exec((err: CallbackError, animals: IAnimal[]) => {
-      const animalsBySpecies = animals.reduce(
-        (
-          acc: {
-            [x: string]: {
-              quantity: number;
-              highestAttack?: { name: string; attack: number };
-              highestLife?: { name: string; life: number };
-            };
-          },
-          curr: IAnimal
-        ) => {
-          if (curr.species in acc) {
-            const accSpecies = acc[curr.species];
-            return {
-              ...acc,
-              [curr.species]: {
-                ...accSpecies,
-                quantity: accSpecies.quantity + 1,
-                ...(!accSpecies.highestAttack ||
-                accSpecies.highestAttack.attack < curr.attack.initial
-                  ? {
-                      highestAttack: {
-                        name: curr.name,
-                        attack: curr.attack.initial,
-                      },
-                    }
-                  : {}),
-                ...(!accSpecies.highestLife ||
-                accSpecies.highestLife.life < curr.life.initial
-                  ? {
-                      highestLife: { name: curr.name, life: curr.life.initial },
-                    }
-                  : {}),
-              },
-            };
-          } else return acc;
-        },
-        {
-          "🐸": {
-            quantity: 0,
-            highestAttack: undefined,
-            highestLife: undefined,
-          },
-          "🦅": {
-            quantity: 0,
-            highestAttack: undefined,
-            highestLife: undefined,
-          },
-          "🦈": {
-            quantity: 0,
-            highestAttack: undefined,
-            highestLife: undefined,
-          },
-          "🦂": {
-            quantity: 0,
-            highestAttack: undefined,
-            highestLife: undefined,
-          },
-          "🐺": {
-            quantity: 0,
-            highestAttack: undefined,
-            highestLife: undefined,
-          },
-          "🦎": {
-            quantity: 0,
-            highestAttack: undefined,
-            highestLife: undefined,
-          },
-        }
-      );
+      const animalsBySpecies = getAnimalsBy(animals, "species");
+      const animalsByHabitat = getAnimalsBy(animals, "habitat");
       responseHandler(
         res,
         err,
-        { all: animals.length, ...animalsBySpecies },
-        "Error getting all animals statistics"
+        { count: animals.length, species: animalsBySpecies, habitat: animalsByHabitat },
+        "Error getting animals statistics"
       );
     });
   }
@@ -160,9 +139,7 @@ export class AnimalsController {
       .then(() => {
         defaultOkResponse(res, `${cardsArray.length} cards created`);
       })
-      .catch((err) =>
-        log.error("Error creating many animals cards", JSON.stringify(err))
-      );
+      .catch((err) => log.error("Error creating many animals cards", JSON.stringify(err)));
   }
 
   /*   static async updateManyAnimals(req: Request, res: Response) {

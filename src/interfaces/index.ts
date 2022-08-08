@@ -4,7 +4,6 @@ export interface IAnimal extends Document {
   created_at: string;
   name: string;
   species: string;
-  image: string;
   skill: {
     name: string;
     description: string;
@@ -18,6 +17,7 @@ export interface IAnimal extends Document {
   bleeding: boolean;
   price: number;
   sell_price: number;
+  habitat: string;
 }
 
 export interface IFeedback extends Document {
