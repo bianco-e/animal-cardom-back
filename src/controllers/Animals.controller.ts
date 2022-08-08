@@ -87,7 +87,7 @@ export class AnimalsController {
   }
 
   static async getFilteredAnimals(req: Request, res: Response) {
-    const { species, owned, skill_type, owned_to_filter } = req.query;
+    const { habitat, species, owned, skill_type, owned_to_filter } = req.query;
     const parseStringToArray = (string: any): string[] => string.toString().split(";");
     AnimalCard.find({
       ...(owned
@@ -96,6 +96,7 @@ export class AnimalsController {
         ? { name: { $nin: parseStringToArray(owned_to_filter) } }
         : {}),
       ...(species ? { species: species.toString() } : {}),
+      ...(habitat ? { habitat: habitat.toString() } : {}),
       ...(skill_type ? { "skill.types": skill_type } : {}),
     }).exec((err: CallbackError, animals: IAnimal[]) => {
       responseHandler(res, err, { animals }, "Error getting filtered animals");
