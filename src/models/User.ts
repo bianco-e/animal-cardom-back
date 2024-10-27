@@ -1,24 +1,11 @@
-import { Schema, model } from "mongoose";
-import { IUser } from "../interfaces";
-
-const UserSchema = new Schema<IUser>(
-  {
-    auth_id: String,
-    picture: String,
-    email: String,
-    first_name: String,
-    last_name: String,
-    locale: String,
-    xp: Number,
-    coins: Number,
-    owned_cards: [String],
-    hand: [String],
-    preferences: {
-      language: String,
-    },
-    role: String,
-  },
-  { collection: "users", versionKey: false }
-);
-
-export default model<IUser>("User", UserSchema);
+export default interface User {
+  id: string
+  first_name: string
+  last_name: string
+  email: string
+  profile_img: string
+  role_id: number
+  google_id: string
+  created_at: string
+  deleted_at: string
+}

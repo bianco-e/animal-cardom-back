@@ -1,162 +1,131 @@
-import { Request, Response } from "express";
-import { CallbackError } from "mongoose";
-import { IAnimal } from "../interfaces";
-import AnimalCard from "../models/AnimalCard";
-import { getTimeStamp } from "../utils";
-import {
-  defaultErrorResponse,
-  defaultOkResponse,
-  responseHandler,
-} from "../utils/defaultResponses";
-import log from "../utils/logger";
+import type { Request, Response } from 'express'
+import Animal, { AnimalInput } from '../models/Animal'
+import knex from '../index'
+import { respondError } from '../utils/defaultResponses'
+import { ERROR_CODES } from '../utils/constants'
+import { getAnimalsStatsByProperty } from './utils'
 
-const getAnimalsBy = (animals: IAnimal[], by: "habitat" | "species") => {
-  return animals.reduce(
-    (
-      acc: {
-        [x: string]: {
-          count: number;
-          highest_attack?: { name: string; attack: number };
-          highest_life?: { name: string; life: number };
-        };
-      },
-      currentAnimal: IAnimal
-    ) => {
-      const currElement = acc[currentAnimal[by]];
-      const addHighestAttack =
-        !currElement ||
-        !currElement.highest_attack ||
-        currElement.highest_attack.attack < currentAnimal.attack.initial;
-      const addHighestLife =
-        !currElement ||
-        !currElement.highest_life ||
-        currElement.highest_life.life < currentAnimal.life.initial;
-
-      return {
-        ...acc,
-        [currentAnimal[by]]: {
-          ...currElement,
-          count: (currElement ? currElement.count : 0) + 1,
-          ...(addHighestAttack
-            ? {
-                highest_attack: {
-                  name: currentAnimal.name,
-                  attack: currentAnimal.attack.initial,
-                },
-              }
-            : {}),
-          ...(addHighestLife
-            ? {
-                highest_life: { name: currentAnimal.name, life: currentAnimal.life.initial },
-              }
-            : {}),
-        },
-      };
-    },
-    {}
-  );
-};
+const baseQuery = () =>
+  knex<Animal>('animals')
+    .select(
+      'animals.*',
+      'species.name as species_name',
+      'species.description as species_description',
+      'species.icon as species_icon',
+      'habitats.name as habitat_name'
+    )
+    .from('animals')
+    .leftJoin('species', 'animals.species_id', 'species.id')
+    .leftJoin('habitats', 'animals.habitat_id', 'habitats.id')
 
 export class AnimalsController {
-  static async getAllAnimals(req: Request, res: Response) {
-    AnimalCard.find({}).exec((err: CallbackError, animals: IAnimal[]) => {
-      responseHandler(res, err, { animals }, "Error getting all animals");
-    });
+  static async getAllAnimals(req: Request, res: Response): Promise<void> {
+    const { species_id, habitat_id, price, skill_use_type_id, skill_type_id, sort_by, order, limit } = req.query
+    try {
+      const animals = await baseQuery()
+        .modify(queryBuilder => {
+          if (species_id) {
+            queryBuilder.where('animals.species_id', species_id)
+          }
+          if (habitat_id) {
+            queryBuilder.where('animals.habitat_id', habitat_id)
+          }
+          if (price) {
+            queryBuilder.where('animals.price', price)
+          }
+          if (skill_type_id) {
+            queryBuilder.where('animals.skill_type_id', skill_type_id)
+          }
+          if (skill_use_type_id) {
+            queryBuilder.where('animals.skill_use_type_id', skill_use_type_id)
+          }
+          if (limit) {
+            queryBuilder.limit(parseInt(limit as string, 10))
+          }
+        })
+        .orderBy(sort_by ? (sort_by as string) : 'name', order ? (order as string) : 'asc')
+
+      res.json(animals)
+    } catch (e) {
+      respondError(res, 'Error getting animals', JSON.stringify(e))
+    }
   }
 
-  static async getAllAnimalsStatistics(req: Request, res: Response) {
-    AnimalCard.find({}).exec((err: CallbackError, animals: IAnimal[]) => {
-      const animalsBySpecies = getAnimalsBy(animals, "species");
-      const animalsByHabitat = getAnimalsBy(animals, "habitat");
-      responseHandler(
-        res,
-        err,
-        { count: animals.length, species: animalsBySpecies, habitat: animalsByHabitat },
-        "Error getting animals statistics"
-      );
-    });
+  static async getAllAnimalsStats(req: Request, res: Response): Promise<void> {
+    try {
+      const animals: Animal[] = await baseQuery()
+      const animalsBySpecies = getAnimalsStatsByProperty(animals, 'species_id')
+      const animalsByHabitat = getAnimalsStatsByProperty(animals, 'habitat_id')
+      res.status(200).send({ count: animals.length, species: animalsBySpecies, habitat: animalsByHabitat })
+    } catch (e) {
+      respondError(res, 'Error getting animals stats', JSON.stringify(e))
+    }
   }
 
-  static async getNewestAnimals(req: Request, res: Response) {
-    AnimalCard.find({})
-      .sort("-created_at")
-      .limit(3)
-      .exec((err: CallbackError, animals: IAnimal[]) => {
-        responseHandler(res, err, { animals }, "Error getting newest animals");
-      });
+  static async getRandomAnimals(req: Request, res: Response, limit: number = 10): Promise<Animal[]> {
+    try {
+      const animals: Animal[] = await baseQuery().orderByRaw('RANDOM()').limit(limit)
+      return animals
+    } catch (e) {
+      respondError(res, `Error getting ${limit} random animals`, JSON.stringify(e))
+      return Promise.reject()
+    }
   }
 
-  static async getFilteredAnimals(req: Request, res: Response) {
-    const { habitat, species, owned, skill_type, owned_to_filter } = req.query;
-    const parseStringToArray = (string: any): string[] => string.toString().split(";");
-    AnimalCard.find({
-      ...(owned
-        ? { name: { $in: parseStringToArray(owned) } }
-        : owned_to_filter
-        ? { name: { $nin: parseStringToArray(owned_to_filter) } }
-        : {}),
-      ...(species ? { species: species.toString() } : {}),
-      ...(habitat ? { habitat: habitat.toString() } : {}),
-      ...(skill_type ? { "skill.types": skill_type } : {}),
-    }).exec((err: CallbackError, animals: IAnimal[]) => {
-      responseHandler(res, err, { animals }, "Error getting filtered animals");
-    });
+  static async getAnimalById(req: Request, res: Response): Promise<void> {
+    const { id } = req.params
+    try {
+      const animal: Animal = await baseQuery().where('animals.id', id).first()
+      res.json(animal)
+    } catch (e) {
+      respondError(res, `Error getting animal with id ${id}`, JSON.stringify(e))
+    }
   }
 
-  static async getAnimalByName(req: Request, res: Response) {
-    const { name } = req.params;
-    if (!name) return defaultErrorResponse(res, "No animal received");
-    AnimalCard.findOne({
-      name: { $regex: name.toString(), $options: "i" },
-    }).exec((err: CallbackError, animal: IAnimal | null) => {
-      responseHandler(
-        res,
-        err,
-        animal,
-        `Error getting requested animal: ${req.query.name}`,
-        "Animal does not exist"
-      );
-    });
-  }
+  static async createAnimal(req: Request, res: Response): Promise<void> {
+    try {
+      const {
+        name,
+        scientific_name,
+        description,
+        species_id,
+        habitat_id,
+        attack,
+        life,
+        price,
+        skill_name,
+        skill_description,
+        skill_type_id,
+        skill_use_type_id,
+        targeteable,
+        bleeding,
+        missing_chance
+      } = req.body
 
-  static async createAnimal(req: Request, res: Response) {
-    const newCard = new AnimalCard({
-      ...req.body,
-      sell_price: Math.ceil(req.body.price / 2),
-      created_at: getTimeStamp(),
-    });
-    newCard.save((err: CallbackError, createdAnimalCard: IAnimal) => {
-      responseHandler(res, err, createdAnimalCard, "Error creating new animal card");
-    });
+      const newAnimal: AnimalInput = {
+        name,
+        scientific_name,
+        description,
+        species_id: parseInt(species_id, 10),
+        habitat_id: parseInt(habitat_id, 10),
+        attack: parseInt(attack, 10),
+        life: parseInt(life, 10),
+        price: parseInt(price, 10),
+        created_at: new Date().toISOString(),
+        skill_name,
+        skill_description,
+        skill_type_id: parseInt(skill_type_id, 10),
+        skill_use_type_id: parseInt(skill_use_type_id, 10),
+        targeteable,
+        bleeding,
+        missing_chance: parseInt(missing_chance, 10)
+      }
+      if (Object.values(newAnimal).some(value => value === null || value === undefined)) {
+        respondError(res, 'Bad request - creating animal, missing fields', null, ERROR_CODES.BAD_REQUEST)
+      }
+      return await knex('animals').insert(newAnimal)
+    } catch (e) {
+      respondError(res, 'Error creating animal', JSON.stringify(e))
+    }
   }
-
-  static async createManyAnimals(req: Request, res: Response) {
-    const cardsArray = req.body.map((card: IAnimal) => ({
-      ...card,
-      sell_price: Math.ceil(req.body.price / 2),
-      created_at: getTimeStamp(),
-    }));
-    AnimalCard.create(cardsArray)
-      .then(() => {
-        defaultOkResponse(res, `${cardsArray.length} cards created`);
-      })
-      .catch((err) => log.error("Error creating many animals cards", JSON.stringify(err)));
-  }
-
-  /*   static async updateManyAnimals(req: Request, res: Response) {
-    const animals = await AnimalCard.find({}).select(["name", "price"]);
-    if (!animals) return;
-    await AnimalCard.bulkWrite(
-      animals.map((a) => {
-        return {
-          updateOne: {
-            filter: { name: a.name },
-            update: { $set: { sell_price: Math.ceil(a.price / 2) || 0 } },
-            options: { multi: true },
-          },
-        };
-      })
-    );
-    res.status(200).send("OK");
-  } */
 }

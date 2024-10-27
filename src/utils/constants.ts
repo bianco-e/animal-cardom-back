@@ -1,3 +1,10 @@
+export const ERROR_CODES = {
+  BAD_REQUEST: 400,
+  UNAUTHORIZED: 401,
+  NOT_FOUND: 404,
+  INTERNAL_ERROR: 500
+}
+
 const CAMPAIGN_CIRCUIT_XP = [0, 450, 900, 1350, 1800, 2250, 2700, 3150, 3600];
 
 const INITIAL_ANIMALS = ["Alligator", "Basilisk Lizard", "Spider", "Octopus", "Vulture"];
