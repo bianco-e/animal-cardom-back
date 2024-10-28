@@ -20,10 +20,13 @@ const baseQuery = () =>
 
 export class AnimalsController {
   static async getAllAnimals(req: Request, res: Response): Promise<void> {
-    const { species_id, habitat_id, price, skill_use_type_id, skill_type_id, sort_by, order, limit } = req.query
+    const { name, species_id, habitat_id, price, skill_use_type_id, skill_type_id, sort_by, order, limit } = req.query
     try {
       const animals = await baseQuery()
         .modify(queryBuilder => {
+          if (name) {
+            queryBuilder.whereILike('animals.name', `%${name}%`)
+          }
           if (species_id) {
             queryBuilder.where('animals.species_id', species_id)
           }

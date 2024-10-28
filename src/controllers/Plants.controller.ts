@@ -6,10 +6,13 @@ import { ERROR_CODES } from '../utils/constants'
 
 export class PlantsController {
   static async getAllPlants(req: Request, res: Response): Promise<void> {
-    const { use_type_id, sort_by, order, limit } = req.query
+    const { name, use_type_id, sort_by, order, limit } = req.query
     try {
       const plants = await knex<Plant>('plants')
         .modify(queryBuilder => {
+          if (name) {
+            queryBuilder.whereILike('name', `%${name}%`)
+          }
           if (use_type_id) {
             queryBuilder.where('use_type_id', use_type_id)
           }

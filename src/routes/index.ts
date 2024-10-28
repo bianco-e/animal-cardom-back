@@ -3,9 +3,10 @@ import authRoutes from './auth'
 import plantsRoutes from './plants'
 import habitatsRoutes from './habitats'
 import gamesRoutes from './games'
-import usersRouter from './users'
-import speciesRouter from './species'
-import skillTypesRouter from './skillTypes'
+import campaignsRoutes from './campaigns'
+import usersRoutes from './users'
+import speciesRoutes from './species'
+import skillTypesRoutes from './skillTypes'
 import { Router } from 'express'
 
 const router: Router = Router()
@@ -14,8 +15,9 @@ router.use('/auth', authRoutes)
 router.use('/plants', plantsRoutes)
 router.use('/habitats', habitatsRoutes)
 router.use('/games', gamesRoutes)
-router.use('/users', usersRouter)
-router.use('/species', speciesRouter)
-router.use('/skill_types', skillTypesRouter)
+router.use('/campaigns', campaignsRoutes)
+router.use('/users', usersRoutes)
+router.use('/species', speciesRoutes)
+router.use('/skill_types', skillTypesRoutes)
 
 export default router
