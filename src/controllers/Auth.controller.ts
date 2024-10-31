@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken'
 import { getBearer } from '../utils'
 import knex from '../index'
 import { ERROR_CODES } from '../utils/constants'
+import { createToken } from './utils'
 
 const JWT_SECRET = process.env.JWT_SECRET
 
@@ -16,9 +17,7 @@ export class AuthController {
       if (!email) return respondError(res, `Missing params`, null, ERROR_CODES.BAD_REQUEST)
       const user = await knex<User>('users').where('email', email).first()
       if (!user) return respondError(res, `Not able to log in user`, null, ERROR_CODES.UNAUTHORIZED)
-      const token = jwt.sign({ email: user.email, role_id: user.role_id }, JWT_SECRET, {
-        expiresIn: 172800 //2d
-      })
+      const token = createToken({ email: user.email, role_id: user.role_id })
       res.status(200).send({
         token,
         user

@@ -44,45 +44,47 @@ Receives an array of objects with the structure of a habitat as body
 
 ### Users
 
-- POST `/users/create` - Creates new user
+- POST `/users/me` - Returns user data
 
 ```
-Receives an object with user structure as body
+Receives an object with email property as body
 ```
 
-- POST `/users/me` - Returns all user data
+- POST `/users` - Creates new user
 
 ```
-Receives an object with auth_id property as body
+Receives an object with google user structure as body
 ```
 
-- POST `/users/profile` - Returns user profile related to the game without personal data
+### Campaigns
+
+- GET `/campaigns` - Returns an array with all existing campaigns. Filters can apply using query params: `user_id`, `sort_by`, `order`, `limit`
+
+- GET `/campaigns/:id` - Returns a single campaign by ID
+
+- POST `/campaigns` - Creates a new campaign
 
 ```
-Receives an object with auth_id property as body
+Receives user_id as body
 ```
 
-- POST `/users/hand/update` - Updates user current hand
+### CampaignAnimals
+
+- POST `/campaign_animals` -  Adds new card to user owned cards, and substract card price from coins
 
 ```
-Receives an object with auth_id and hand (array of strings) properties as body
+Receives an object with animal_id and campaign_id properties as body
 ```
 
-- POST `/users/owned_cards/add` - Adds new card to user owned cards
+- PUT `/campaign_animals` -  Updates user current hand
 
 ```
-Receives an object with auth_id and new_card (string) properties as body
-```
-
-- POST `/users/animal_purchase` - Adds new card to user owned cards, and substract card price from user coins
-
-```
-Receives an object with auth_id, price and new_card (string) properties as body
+Receives an object with campaign_id, old_hand (animal_id list) and new_hand (animal_id list) as body
 ```
 
 ### Feedback
 
-- POST `/feedback/give` - Creates a new feedback message
+- POST `/feedback` - Creates a new feedback message
 
 ```
 Receives an object with name (optional) and message properties as body

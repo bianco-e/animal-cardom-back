@@ -85,6 +85,15 @@ export class AnimalsController {
     }
   }
 
+  static async getAnimalsByIds(ids: Animal['id'][]): Promise<Animal[]> {
+    try {
+      const animals: Animal[] = await baseQuery().whereIn('animals.id', ids)
+      return animals
+    } catch (e) {
+      return Promise.reject(e)
+    }
+  }
+
   static async createAnimal(req: Request, res: Response): Promise<void> {
     try {
       const {

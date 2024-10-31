@@ -1,4 +1,13 @@
 import Animal from '../models/Animal'
+import jwt from 'jsonwebtoken'
+
+export const createToken = (userInput: { email: string; role_id: number }) => {
+  const JWT_SECRET = process.env.JWT_SECRET
+  const token = jwt.sign({ email: userInput.email, role_id: userInput.role_id }, JWT_SECRET as string, {
+    expiresIn: 172800 //2d
+  })
+  return token
+}
 
 export const getAnimalsStatsByProperty = (animals: Animal[], by: 'habitat_id' | 'species_id') => {
   return animals.reduce(

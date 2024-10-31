@@ -82,27 +82,6 @@ create table users (
         REFERENCES user_roles(id)
 );
 
-create table campaigns (
-    id uuid not null primary key,
-    user_id uuid not null,
-    xp int,
-    coins int,
-    created_at timestamp not null,
-    FOREIGN KEY(user_id) 
-        REFERENCES users(id)
-);
-
-create table campaign_animals (
-    id bigserial not null primary key,
-    campaign_id uuid not null,
-    animal_id int not null,
-    is_in_hand boolean,
-    FOREIGN KEY(campaign_id) 
-        REFERENCES campaigns(id),
-    FOREIGN KEY(animal_id) 
-        REFERENCES animals(id)
-);
-
 insert into user_roles (name, description) VALUES
     ('ADMIN', 'Has read and write DB permissions'),
     ('REGULAR', 'Has read and write (only for actions related to its own account) DB permissions');
@@ -157,7 +136,7 @@ insert into skill_types (name, description) VALUES
 
 insert into animals (name, scientific_name, description, species_id, habitat_id, attack, life, price, skill_name, skill_description, skill_type_id, skill_use_type_id, created_at, targeteable, bleeding, missing_chance) VALUES
     ('Alligator', 'Alligator mississippiensis', 'Large, primarily freshwater reptiles with a broad snout, known for their powerful bite.', 3, 4, 6, 7, 90, 'Nibble', 'Bites its enemy using its powerful jaws inflicting 1 extra damage', 9, 3, NOW(), true, false, 0),
-    ('Axolotl', 'Ambystoma mexicanum', 'A unique aquatic salamander known for its regenerative abilities and perpetual juvenile state.', 4, 4, 3, 4, 45, 'Limb regrowth', 'Regrows its limbs after being attacked (if not lethal damage) healing 2 life points', 2, 4, NOW(), true, false, 0),
+    ('Axolotl', 'Ambystoma mexicanum', 'A unique aquatic salamander known for its regenerative abilities and perpetual juvenile state.', 4, 4, 3, 4, 45, 'Limb regrowth', 'Regrows its limbs after being attacked (if not lethal damage). Heals 2 life points', 2, 4, NOW(), true, false, 0),
     ('Ball Bug', 'Armadillidiidae', 'Also known as pill bugs, these crustaceans can roll into a ball for protection.', 6, 5, 1, 3, 45, 'Ball shape', 'Ball Bug has 50% chance of turning into a ball taking 1 less damage when it''s attacked', 6, 4, NOW(), true, false, 0),
     ('Basilisk Lizard', 'Basiliscus basiliscus', 'Known for its ability to "walk on water," it uses its agility to escape predators.', 4, 4, 3, 4, 90, 'Jesus Christ', 'Its agility gives it 30% chance of avoiding any attack', 6, 4, NOW(), true, false, 0),
     ('Bat', 'Chiroptera', 'Flying mammals known for echolocation, they play vital roles in pest control and pollination.', 1, 3, 2, 3, 90, 'Vamp', 'Bat sucks enemy''s blood earning 1 life point and leaving the enemy bleeding', 5, 3, NOW(), true, false, 0),
@@ -204,3 +183,51 @@ insert into animals (name, scientific_name, description, species_id, habitat_id,
     ('Tortoise', 'Testudinidae', 'Land-dwelling reptiles with a protective shell and a slow-moving lifestyle', 3, 7, 2, 9, 90, 'Hibernate', 'Hibernates inside its shell after attacking which increases its total life by 2', 4, 3, NOW(), true, false, 0),
     ('Vulture', 'Cathartidae', 'Scavenging birds of prey known for their role in cleaning up animal carcasses.', 2, 6, 3, 5, 135, 'Carrion', 'After attacking Vulture''s attack will be increased by 4 if there''s any dead animal', 4, 3, NOW(), true, false, 0),
     ('Wolf', 'Canis lupus', 'Social canines known for their pack behavior and distinct howling.', 1, 6, 7, 7, 135, 'Loud howl', 'Howls after attacking encouraging its allies which increases their attack by 1', 4, 3, NOW(), true, false, 0);
+
+create table campaign_levels (
+    id bigserial not null primary key,
+    habitat_id int not null,
+    level_required int not null unique,
+    animal_id_reward int,
+    coins_reward int,
+    pc_animal_ids int[10],
+    FOREIGN KEY(habitat_id) 
+        REFERENCES habitats(id),
+    FOREIGN KEY(animal_id_reward) 
+        REFERENCES animals(id)
+);
+
+insert into campaign_levels (habitat_id, level_required, animal_id_reward, coins_reward, pc_animal_ids) VALUES
+    (1, 0, NULL, 5, '{31, 7, 35, 45, 38, 3, 13, 28, 18, 26}'),
+    (1, 1, NULL, 5, '{31, 7, 35, 45, 21, 5, 28, 38, 11, 16}'),
+    (1, 2, NULL, 5, '{46, 7, 35, 45, 44, 38, 8, 16, 37, 28}'),
+    (2, 3, 18, 5, '{38, 7, 42, 45, 18, 4, 47, 44, 26, 46}'), 
+    (3, 4, 7, 5, '{31, 7, 42, 39, 3, 26, 5, 45, 15, 18}'),
+    (4, 5, 37, 5, '{15, 9, 35, 37, 38, 34, 5, 12, 42, 43}'),
+    (5, 6, 33, 5, '{44, 40, 16, 43, 8, 13, 33, 32, 37, 4}'),
+    (6, 7, 41, 5, '{11, 14, 41, 46, 28, 25, 1, 4, 33, 17}'),
+    (7, 8, 27, 5, '{27, 17, 48, 12, 24, 19, 6, 33, 40, 1}');
+
+create table campaigns (
+    id uuid not null primary key,
+    user_id uuid not null unique,
+    level int,
+    coins int,
+    created_at timestamp not null,
+    FOREIGN KEY(user_id) 
+        REFERENCES users(id),
+    FOREIGN KEY(level)
+        REFERENCES campaign_levels(level_required)
+);
+
+create table campaign_animals (
+    id bigserial not null primary key,
+    campaign_id uuid not null,
+    animal_id int not null,
+    is_in_hand boolean,
+    CONSTRAINT unique_campaign_animal_pair UNIQUE (campaign_id, animal_id),
+    FOREIGN KEY(campaign_id) 
+        REFERENCES campaigns(id),
+    FOREIGN KEY(animal_id) 
+        REFERENCES animals(id)
+);

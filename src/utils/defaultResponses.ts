@@ -22,8 +22,7 @@ export const respondError = (
   if (error) {
     log.error(`${errorMessage} - ${error}`)
   }
-  res.status(code).send(errorMessage)
-  res.end()
+  res.status(code).send({ error: errorMessage, code })
 }
 
 export const responseHandler = (res: Response, err: any, doc: any, errMsg: string, nullDocMsg?: string) => {

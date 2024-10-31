@@ -9,3 +9,11 @@ export default interface User {
   created_at: string
   deleted_at: string
 }
+
+export interface GoogleUser {
+  sub: User["google_id"]
+  picture: User["profile_img"]
+  email: User["email"]
+  given_name: User["first_name"]
+  family_name: User["last_name"]
+}
