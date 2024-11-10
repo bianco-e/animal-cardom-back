@@ -118,7 +118,8 @@ insert into plants (name, description, use_type_id) VALUES
     ('Horsetail', 'Its leaves have properties that help cells to regenerate: stops bleedings', 4),
     ('Cactus', 'Its sharpen spines make an enemy animal bleed', 3),
     ('Ricinum', 'Highly venomous seeds: venoms an enemy making 1 damage per round, for 3 rounds', 3),
-    ('Coffee', 'Contains coffeine: wakes an ally senses eliminating any paralyzing effect', 4);
+    ('Coffee', 'Contains coffeine: wakes an ally senses eliminating any paralyzing effect', 4),
+    ('Venus', 'Its lobes with spiny teeth fold together and enclose a damaged insect instantly killing it', 3);
 
 insert into skill_types (name, description) VALUES
     ('Other', ''),
@@ -140,28 +141,29 @@ insert into animals (name, scientific_name, description, species_id, habitat_id,
     ('Ball Bug', 'Armadillidiidae', 'Also known as pill bugs, these crustaceans can roll into a ball for protection.', 6, 5, 1, 3, 45, 'Ball shape', 'Ball Bug has 50% chance of turning into a ball taking 1 less damage when it''s attacked', 6, 4, NOW(), true, false, 0),
     ('Basilisk Lizard', 'Basiliscus basiliscus', 'Known for its ability to "walk on water," it uses its agility to escape predators.', 4, 4, 3, 4, 90, 'Jesus Christ', 'Its agility gives it 30% chance of avoiding any attack', 6, 4, NOW(), true, false, 0),
     ('Bat', 'Chiroptera', 'Flying mammals known for echolocation, they play vital roles in pest control and pollination.', 1, 3, 2, 3, 90, 'Vamp', 'Bat sucks enemy''s blood earning 1 life point and leaving the enemy bleeding', 5, 3, NOW(), true, false, 0),
-    ('Bear', 'Ursidae', 'Large omnivorous mammals with a thick coat of fur and a strong sense of smell.', 1, 6, 8, 9, 180, 'Sharp claws', 'Bear nails its claws making enemy bleed, inflicting 1 damage per round until it dies', 11, 3, NOW(), true, false, 0),
+    ('Bear', 'Ursidae', 'Large omnivorous mammals with a thick coat of fur and a strong sense of smell.', 1, 6, 8, 9, 180, 'Sharp claws', 'Nails its claws making enemy bleed which inflicts 1 damage per round', 11, 3, NOW(), true, false, 0),
     ('Bee', 'Apidae', 'Essential pollinators known for their role in producing honey and their complex social structures', 6, 3, 4, 3, 90, 'Life or death', 'Stings its enemy making 3 extra damage but dies after doing it', 9, 3, NOW(), true, false, 0),
     ('Blowfish', 'Tetraodontidae', 'Known for its ability to puff up as a defense mechanism, some species are highly toxic.', 5, 2, 2, 5, 90, 'Puff up', 'Puffs up increasing its attack by 2 after attacking', 4, 3, NOW(), true, false, 0),
     ('Cassowary', 'Casuarius', 'A large, flightless bird with a helmet-like casque and powerful claws.', 2, 3, 6, 6, 135, 'Assault', 'Cassowary uses its casque and claws to knock enemy paralyzing it for 1 round', 5, 3, NOW(), true, false, 0),
     ('Caterpillar', 'Lepidoptera larvae', 'The larval stage of butterflies and moths, known for their rapid growth and transformation.', 6, 3, 1, 3, 45, 'Evolution', 'After getting killed it turns into a Butterfly', 1, 4, NOW(), true, false, 0),
-    ('Chameleon', 'Chamaeleonidae', 'Lizards known for their color-changing skin, which aids in camouflage.', 3, 7, 3, 4, 45, 'Mimicry', 'Chameleon is untargeteable. Can''t be seen until it attacks.', 12, 1, NOW(), false, false, 0),
-    ('Cheetah', 'Acinonyx jubatus', 'The fastest land animal, adapted for high-speed chases over short distances.', 1, 5, 7, 7, 135, 'Ambush', 'Hides behind bush. Can''t be targeted until it attacks first', 12, 1, NOW(), false, false, 0),
+    ('Chameleon', 'Chamaeleonidae', 'Lizards known for their color-changing skin, which aids in camouflage.', 3, 7, 3, 4, 45, 'Mimicry', 'Chameleon is untargeteable. Can''t be seen until it attacks.', 12, 3, NOW(), false, false, 0),
+    ('Cheetah', 'Acinonyx jubatus', 'The fastest land animal, adapted for high-speed chases over short distances.', 1, 5, 7, 7, 135, 'Ambush', 'Hides behind bush. Can''t be targeted until it attacks first', 12, 3, NOW(), false, false, 0),
     ('Comb Star', 'Asteroidea', 'A starfish that uses its arms for locomotion and can regenerate lost limbs.', 5, 2, 1, 3, 45, 'Poisonous flesh', 'Poisons any enemy that attacks it taking 1 damage per round for 5 rounds', 8, 4, NOW(), true, false, 0),
-    ('Crocodile', 'Crocodylinae', 'Large aquatic reptiles known for their powerful jaws and stealthy hunting methods', 3, 4, 10, 10, 180, 'Nibble', 'Bites its enemy using its strong jaws which inflicts 2 extra damage', 9, 3, NOW(), true, false, 0),
+    ('Condor', 'Vultur gryphus', 'The largest bird of prey in the world, a scavenger that prefers large carcasses and can live until 50 years.', 2, 6, 4, 6, 135, 'Carcasse hunger', 'After attacking, its attack increases by 3 if there''s any dead mammal', 4, 3, NOW(), true, false, 0),
+    ('Crocodile', 'Crocodylinae', 'Large aquatic reptiles known for their powerful jaws and stealthy hunting methods', 3, 4, 10, 9, 180, 'Nibble', 'Bites its enemy using its strong jaws which inflicts 2 extra damage', 9, 3, NOW(), true, false, 0),
     ('Eagle', 'Aquila', 'Large birds of prey with excellent eyesight and powerful talons, known for their hunting skills', 2, 6, 6, 7, 135, 'Free fall', 'Falls from the sky pecking its enemy making 2 extra damage or killing it if it''s an insect', 9, 3, NOW(), true, false, 0),
     ('Electric Eel', 'Electrophorus electricus', 'A freshwater fish capable of generating powerful electric shocks to stun prey.', 5, 2, 3, 5, 45, 'Electric shock', 'Electric Eel can shock an enemy paralyzing it for 2 rounds', 5, 3, NOW(), true, false, 0),
-    ('Elephant', 'Elephas maximus', 'The largest land mammals, known for their intelligence, social behavior, and strong family bonds', 1, 7, 6, 12, 180, 'Stomp', 'Stomps decreasing all enemies'' attack by 1 (if their attack is more than 1)', 1, 3, NOW(), true, false, 0),
+    ('Elephant', 'Elephas maximus', 'The largest land mammals, known for their intelligence, social behavior, and strong family bonds', 1, 7, 6, 11, 180, 'Stomp', 'Stomps decreasing all enemies'' attack by 1 (if their attack is more than 1)', 1, 3, NOW(), true, false, 0),
     ('Frog', 'Anura', 'Known for their jumping abilities and vocalizations, frogs are often found near water sources', 4, 4, 2, 3, 45, 'Sticky tongue', 'Frog can use its large tongue to devorate any insect immediately', 10, 3, NOW(), true, false, 0),
-    ('Gorilla', 'Gorilla gorilla', 'Large, intelligent primates known for their social structure and strength.', 1, 3, 8, 10, 180, 'Chest beating', 'Beats its chest after attacking to get motivation, which increases its attack by 1', 4, 3, NOW(), true, false, 0),
+    ('Gorilla', 'Gorilla gorilla', 'Large, intelligent primates known for their social structure and strength.', 1, 3, 8, 9, 180, 'Chest beating', 'Beats its chest after attacking to get motivation, which increases its attack by 1', 4, 3, NOW(), true, false, 0),
     ('Grasshopper', 'Caelifera', 'Insects known for their strong hind legs, which allow them to leap long distances.', 6, 7, 2, 2, 45, 'Legs power', 'Jumps before getting attacked having a 10% chance to dodge the attack', 6, 4, NOW(), true, false, 0),
     ('Hedgehog', 'Erinaceinae', 'Small mammals with spiny protection, they curl up to avoid predators.', 1, 7, 2, 4, 45, 'Spines cover', 'Returns its current attack points to the attacker', 8, 4, NOW(), true, false, 0),
     ('Horned Lizard', 'Phrynosoma', 'Lizards that can squirt blood from their eyes as a defense mechanism.', 3, 5, 3, 4, 45, 'Blood Shoot', 'Shoots blood from its eyes blinding an enemy adding it 25% chance of missing attacks', 7, 3, NOW(), true, true, 0),
     ('Hummingbird', 'Trochilidae', 'Tiny birds known for their rapid wing beats, hovering ability, and love of nectar.', 2, 7, 2, 3, 90, 'Nectar addiction', 'Disables an enemy random plant by absorbing all its nectar after attacking', 1, 3, NOW(), true, false, 0),
     ('Hyena', 'Hyaenidae', 'Carnivorous mammals known for their scavenging habits and powerful jaws.', 1, 5, 7, 7, 135, 'Bite the wound', 'Makes 2 extra damage if enemy attacked is already injuried', 9, 3, NOW(), true, false, 0),
-    ('Komodo Dragon', 'Varanus komodoensis', 'The largest lizard species, known for its venomous bite.', 3, 5, 10, 10, 180, 'Poisonous saliva', 'Bites inflicting 1 extra damage and poisoning its enemy for 1 round', 3, 3, NOW(), true, false, 0),
+    ('Komodo Dragon', 'Varanus komodoensis', 'The largest lizard species, known for its venomous bite.', 3, 5, 10, 9, 180, 'Poisonous saliva', 'Bites inflicting 1 extra damage and poisoning its enemy for 1 round', 3, 3, NOW(), true, false, 0),
     ('Leech', 'Hirudinea', 'Blood-sucking invertebrates often found in freshwater habitats.', 6, 4, 1, 3, 45, 'Blood thirst', 'Sucks enemy''s blood (if bleeding) earning 2 life points', 4, 3, NOW(), true, false, 0),
-    ('Lion', 'Panthera leo', 'The "king of the jungle," known for its social structure and hunting skills.', 1, 3, 10, 10, 180, 'Roar', 'Roars before attacking which scares the enemy paralyzing it for 3 rounds', 5, 3, NOW(), true, false, 0),
+    ('Lion', 'Panthera leo', 'The "king of the jungle," known for its social structure and hunting skills.', 1, 3, 10, 9, 180, 'Roar', 'Roars before attacking which scares the enemy paralyzing it for 3 rounds', 5, 3, NOW(), true, false, 0),
     ('Lizard', 'Lacertilia', 'A diverse group of reptiles, some of which can shed their tails to escape predators.', 3, 7, 2, 4, 45, 'Tail cheat', 'Cheats its enemy leaving the tail when attacked so it receives 1 less damage', 6, 4, NOW(), true, false, 0),
     ('Llama', 'Lama glama', 'Domesticated South American animals known for their wool and ability to carry loads.', 1, 6, 4, 5, 90, 'Spittle', 'Spits on enemy''s face blinding it adding 15% of missing attacks', 7, 3, NOW(), true, false, 0),
     ('Mole', 'Talpidae', 'Burrowing mammals adapted to life underground with powerful forelimbs.', 1, 5, 2, 3, 45, 'Burrow', 'Digs a burrow so it can hide there. Has 50% chance of dodging the attack', 6, 4, NOW(), true, false, 50),
@@ -169,19 +171,20 @@ insert into animals (name, scientific_name, description, species_id, habitat_id,
     ('Octopus', 'Octopoda', 'Marine animals with eight arms, known for their intelligence and ability to release ink to escape predators.', 5, 2, 4, 4, 45, 'Ink shot', 'Throws ink to its enemy blinding it which adds 10% chance of missing attacks', 7, 3, NOW(), true, false, 0),
     ('Orc', 'Orcinus orca', 'Large, powerful marine predators often referred to as killer whales, known for their coordinated hunting.', 1, 2, 7, 11, 180, 'Waterjet', 'Shoots water into enemy''s eyes which blinds it adding 15% chance of missing attacks', 7, 3, NOW(), true, false, 0),
     ('Ostrich', 'Struthio camelus', 'The largest living bird, known for its powerful legs and fast running speeds.', 2, 5, 6, 6, 135, 'Head bury', 'Buries its head when attacked hiding its vital points which dodges 1 damage point', 6, 4, NOW(), true, false, 0),
-    ('Parrot', 'Psittaciformes', 'Colorful and intelligent birds, capable of mimicking sounds and words.', 2, 6, 3, 4, 45, 'Echo', 'When Parrot kills its first enemy automatically copies its skill', 1, 3, NOW(), true, false, 0),
+    ('Parrot', 'Psittaciformes', 'Colorful and intelligent birds, capable of mimicking sounds and words.', 2, 6, 3, 4, 90, 'Echo', 'When Parrot kills its first enemy automatically copies its skill', 1, 3, NOW(), true, false, 0),
     ('Peacock', 'Pavo cristatus', 'A large, colorful bird known for the male’s impressive plumage display to attract mates.', 2, 7, 3, 4, 45, 'Plumage display', 'Distracts its attacker with the plumage getting 30% chance to weaken the attack by 2 points', 6, 4, NOW(), true, false, 0),
     ('Pelican', 'Pelecanus', 'Large water birds with a distinctive pouch under their beak used for catching fish.', 2, 2, 4, 5, 90, 'Bag fishing', 'Makes 2 extra damage to fish', 9, 3, NOW(), true, false, 0),
     ('Salamander', 'Caudata', 'Moist-skinned amphibians with elongated bodies and tails', 4, 4, 2, 4, 45, 'Tissue regeneration', 'Body regenerates after attacking, healing 1 life (if damaged)', 2, 3, NOW(), true, false, 0),
     ('Scorpion', 'Scorpiones', 'Arachnids with pincers and a venomous stinger on the tail used for defense and hunting.', 6, 5, 9, 5, 135, 'Poison', 'Stings its enemy inflicting 1 damage per round for 3 rounds', 3, 3, NOW(), true, false, 0),
     ('Shark', 'Selachimorpha', 'Apex predators in marine ecosystems, known for their sharp teeth and keen sense of smell', 5, 2, 9, 9, 180, 'Bloodseeker', 'Inflicts 2 extra damage if enemy is bleeding', 4, 3, NOW(), true, false, 0),
-    ('Snake', 'Serpentes', 'Legless reptiles with a flexible body, often venomous, and known for their slithering movement.', 3, 7, 8, 7, 135, 'Venom', 'Bites its enemy injecting venom which inflicts 1 damage per round (lasts 3 rounds)', 3, 3, NOW(), true, false, 0),
+    ('Sloth', 'Folivora', 'Tree-dwelling mammals known for their slow movements, long claws, and adaptations for a low-energy lifestyle relying mainly on leaves.', 1, 3, 4, 4, 45, 'Laziness', '60% chance of napping (unable to attack) unless it is the last animal standing in a hand', 1, 1, NOW(), true, false, 0),
+    ('Snake', 'Serpentes', 'Legless reptiles with a flexible body, often venomous, and known for their slithering movement.', 3, 7, 8, 6, 135, 'Venom', 'Bites its enemy injecting venom which inflicts 1 damage per round (lasts 3 rounds)', 3, 3, NOW(), true, false, 0),
     ('Spider', 'Araneae', 'Arachnids with eight legs, known for their ability to spin webs to catch prey.', 6, 5, 6, 4, 90, 'Sticky wrapping', 'Wraps its enemy paralyzing it for 2 rounds', 4, 3, NOW(), true, false, 0),
     ('Stingray', 'Myliobatiformes', 'Flattened marine fish with venomous barbed tails, often found in shallow coastal waters.', 5, 2, 7, 6, 135, 'Barbed sting', 'Sting with venom glands venoms enemy which inflicts 1 damage for 1 round', 3, 3, NOW(), true, false, 0),
     ('Swordfish', 'Xiphias gladius', 'Large, predatory fish known for its long, flat bill resembling a sword.', 5, 2, 4, 5, 90, 'Penetrating sword', 'Penetrates any enemy making it bleed, inflicting 1 damage per round until death', 11, 3, NOW(), true, false, 0),
     ('Toad', 'Bufonidae', 'Amphibians with dry, bumpy skin and often toxic glands, found in a variety of habitats.', 4, 4, 3, 3, 45, 'Sticky tongue', 'Uses its large tongue to devorate any insect immediatly', 10, 3, NOW(), true, false, 0),
     ('Tortoise', 'Testudinidae', 'Land-dwelling reptiles with a protective shell and a slow-moving lifestyle', 3, 7, 2, 9, 90, 'Hibernate', 'Hibernates inside its shell after attacking which increases its total life by 2', 4, 3, NOW(), true, false, 0),
-    ('Vulture', 'Cathartidae', 'Scavenging birds of prey known for their role in cleaning up animal carcasses.', 2, 6, 3, 5, 135, 'Carrion', 'After attacking Vulture''s attack will be increased by 4 if there''s any dead animal', 4, 3, NOW(), true, false, 0),
+    ('Vulture', 'Cathartidae', 'Scavenging birds of prey known for their role in cleaning up animal carcasses.', 2, 6, 3, 5, 90, 'Carrion', 'After attacking its attack increases by 2 if there''s any dead animal', 4, 3, NOW(), true, false, 0),
     ('Wolf', 'Canis lupus', 'Social canines known for their pack behavior and distinct howling.', 1, 6, 7, 7, 135, 'Loud howl', 'Howls after attacking encouraging its allies which increases their attack by 1', 4, 3, NOW(), true, false, 0);
 
 create table campaign_levels (
@@ -198,15 +201,15 @@ create table campaign_levels (
 );
 
 insert into campaign_levels (habitat_id, level_required, animal_id_reward, coins_reward, pc_animal_ids) VALUES
-    (1, 0, NULL, 5, '{31, 7, 35, 45, 38, 3, 13, 28, 18, 26}'),
-    (1, 1, NULL, 5, '{31, 7, 35, 45, 21, 5, 28, 38, 11, 16}'),
-    (1, 2, NULL, 5, '{46, 7, 35, 45, 44, 38, 8, 16, 37, 28}'),
-    (2, 3, 18, 5, '{38, 7, 42, 45, 18, 4, 47, 44, 26, 46}'), 
-    (3, 4, 7, 5, '{31, 7, 42, 39, 3, 26, 5, 45, 15, 18}'),
-    (4, 5, 37, 5, '{15, 9, 35, 37, 38, 34, 5, 12, 42, 43}'),
-    (5, 6, 33, 5, '{44, 40, 16, 43, 8, 13, 33, 32, 37, 4}'),
-    (6, 7, 41, 5, '{11, 14, 41, 46, 28, 25, 1, 4, 33, 17}'),
-    (7, 8, 27, 5, '{27, 17, 48, 12, 24, 19, 6, 33, 40, 1}');
+    (1, 1, NULL, 5, '{30, 7, 31, 11, 37, 3, 13, 27, 17, 25}'),
+    (1, 2, NULL, 5, '{30, 7, 31, 43, 21, 5, 27, 37, 11, 16}'),
+    (1, 3, 22, 5, '{44, 7, 2, 43, 42, 36, 8, 16, 37, 27}'),
+    (2, 4, 19, 5, '{37, 7, 42, 43, 17, 4, 47, 42, 25, 44}'), 
+    (3, 5, 7, 5, '{30, 7, 42, 39, 3, 25, 5, 43, 15, 17}'),
+    (4, 6, 38, 5, '{15, 9, 34, 37, 37, 34, 5, 12, 42, 43}'),
+    (5, 7, 34, 5, '{42, 40, 16, 43, 8, 13, 33, 32, 37, 4}'),
+    (6, 8, 42, 5, '{11, 14, 41, 44, 27, 25, 1, 4, 33, 17}'),
+    (7, 9, 28, 5, '{27, 17, 46, 12, 24, 19, 6, 33, 40, 1}');
 
 create table campaigns (
     id uuid not null primary key,
@@ -230,4 +233,19 @@ create table campaign_animals (
         REFERENCES campaigns(id),
     FOREIGN KEY(animal_id) 
         REFERENCES animals(id)
+);
+
+create table finished_games (
+    id bigserial not null primary key,
+    user_id varchar,
+    habitat_id int not null,
+    habitat_name varchar not null,
+    user_won boolean,
+    pc_used_animals JSONB[],
+    user_used_animals JSONB[],
+    pc_used_plants JSONB[],
+    user_used_plants JSONB[],
+    created_at timestamp,
+    FOREIGN KEY(habitat_id) 
+        REFERENCES habitats(id)
 );

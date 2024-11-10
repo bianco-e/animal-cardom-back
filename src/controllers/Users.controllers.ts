@@ -20,7 +20,6 @@ export class UsersController {
 
   static async createUser(req: Request, res: Response): Promise<void> {
     try {
-      console.log(req.body.user)
       const { sub, picture, email, given_name, family_name } = req.body.user as GoogleUser
       const role_id = REGULAR_USER_ROLE_ID
       const token = createToken({ email, role_id })

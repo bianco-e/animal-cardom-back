@@ -4,7 +4,6 @@ import { validateAdmin } from "../utils/middlewares";
 const habitatsRouter: Router = Router();
 
 habitatsRouter.get("/", HabitatsController.getAllHabitats);
-habitatsRouter.get("/:id", HabitatsController.getHabitatById);
 
 //ADMIN ROUTES
 habitatsRouter.use(validateAdmin);

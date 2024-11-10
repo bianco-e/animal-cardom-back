@@ -21,13 +21,14 @@ export class HabitatsController {
     }
   }
 
-  static async getHabitatById(req: Request, res: Response): Promise<void> {
-    const { id } = req.params
+  static async getHabitatById(id: Habitat['id']): Promise<Habitat> {
     try {
       const habitat = await knex<Habitat>('habitats').where('id', id).first()
-      res.json(habitat)
+      if (habitat) {
+        return habitat
+      } else return Promise.reject({ error: `Habitat with id ${id} not found` })
     } catch (e) {
-      respondError(res, `Error getting habitat with id ${id}`, JSON.stringify(e))
+      return Promise.reject(e)
     }
   }
 
@@ -37,7 +38,7 @@ export class HabitatsController {
       return habitats
     } catch (e) {
       respondError(res, `Error getting random habitat`, JSON.stringify(e))
-      return Promise.reject()
+      return Promise.reject(e)
     }
   }
 

@@ -7,5 +7,5 @@ export default interface CampaignLevel {
   level_required: number
   animal_id_reward: Animal['id']
   coins_reward: number
-  pc_animals: number[]
+  pc_animal_ids: number[]
 }

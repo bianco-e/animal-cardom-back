@@ -6,6 +6,7 @@ import Campaign from '../models/Campaign'
 import { v4 as uuidv4 } from 'uuid'
 import CampaignAnimal from '../models/CampaignAnimal'
 import Animal from '../models/Animal'
+import User from '../models/User'
 
 const baseQuery = () =>
   knex<Campaign>('campaigns')
@@ -78,6 +79,15 @@ export class CampaignsController {
     }
   }
 
+  static async getCampaignByUserId(userId: User['id']): Promise<Campaign> {
+    try {
+      const campaign = await baseQuery().where('campaigns.user_id', userId).first()
+      return campaign
+    } catch (e) {
+      return Promise.reject(e)
+    }
+  }
+
   static async createCampaign(req: Request, res: Response): Promise<void> {
     const { user_id } = req.body
     try {
@@ -85,7 +95,7 @@ export class CampaignsController {
       const [createdCampaign]: Campaign[] = await knex<Campaign>('campaigns').returning('*').insert({
         id,
         user_id,
-        level: 0,
+        level: 1,
         coins: INITIAL_COINS,
         created_at: new Date().toISOString()
       })

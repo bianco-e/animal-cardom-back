@@ -5,7 +5,7 @@ import { respondError } from '../utils/defaultResponses'
 import { ERROR_CODES } from '../utils/constants'
 import { getAnimalsStatsByProperty } from './utils'
 
-const baseQuery = () =>
+export const animalsBaseQuery = () =>
   knex<Animal>('animals')
     .select(
       'animals.*',
@@ -22,7 +22,7 @@ export class AnimalsController {
   static async getAllAnimals(req: Request, res: Response): Promise<void> {
     const { name, species_id, habitat_id, price, skill_use_type_id, skill_type_id, sort_by, order, limit } = req.query
     try {
-      const animals = await baseQuery()
+      const animals = await animalsBaseQuery()
         .modify(queryBuilder => {
           if (name) {
             queryBuilder.whereILike('animals.name', `%${name}%`)
@@ -56,7 +56,7 @@ export class AnimalsController {
 
   static async getAllAnimalsStats(req: Request, res: Response): Promise<void> {
     try {
-      const animals: Animal[] = await baseQuery()
+      const animals: Animal[] = await animalsBaseQuery()
       const animalsBySpecies = getAnimalsStatsByProperty(animals, 'species_id')
       const animalsByHabitat = getAnimalsStatsByProperty(animals, 'habitat_id')
       res.status(200).send({ count: animals.length, species: animalsBySpecies, habitat: animalsByHabitat })
@@ -67,7 +67,7 @@ export class AnimalsController {
 
   static async getRandomAnimals(req: Request, res: Response, limit: number = 10): Promise<Animal[]> {
     try {
-      const animals: Animal[] = await baseQuery().orderByRaw('RANDOM()').limit(limit)
+      const animals: Animal[] = await animalsBaseQuery().orderByRaw('RANDOM()').limit(limit)
       return animals
     } catch (e) {
       respondError(res, `Error getting ${limit} random animals`, JSON.stringify(e))
@@ -78,7 +78,7 @@ export class AnimalsController {
   static async getAnimalById(req: Request, res: Response): Promise<void> {
     const { id } = req.params
     try {
-      const animal: Animal = await baseQuery().where('animals.id', id).first()
+      const animal: Animal = await animalsBaseQuery().where('animals.id', id).first()
       res.json(animal)
     } catch (e) {
       respondError(res, `Error getting animal with id ${id}`, JSON.stringify(e))
@@ -87,7 +87,7 @@ export class AnimalsController {
 
   static async getAnimalsByIds(ids: Animal['id'][]): Promise<Animal[]> {
     try {
-      const animals: Animal[] = await baseQuery().whereIn('animals.id', ids)
+      const animals: Animal[] = await animalsBaseQuery().whereIn('animals.id', ids)
       return animals
     } catch (e) {
       return Promise.reject(e)
