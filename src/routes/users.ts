@@ -1,21 +1,9 @@
-import { Router } from "express";
-import { UsersController } from "../controllers/Users.controller";
-import { validateAdmin, validateToken } from "../utils/middlewares";
-const userRouter: Router = Router();
+import express, { Router } from 'express'
+import { UsersController } from '../controllers/Users.controllers'
+const usersRouter: Router = express.Router()
 
-userRouter.post("/create", UsersController.createUser);
+usersRouter.post('/me', UsersController.getUser)
 
-//TOKEN REQ ROUTES
-userRouter.use(validateToken);
-userRouter.post("/me", UsersController.getUserMe);
-userRouter.post("/profile", UsersController.getUserProfile);
-userRouter.post("/animal_purchase", UsersController.purchaseAnimal);
-userRouter.post("/hand/update", UsersController.updateUserHand);
-userRouter.post("/animal_sell", UsersController.sellAnimal);
+usersRouter.post('/', UsersController.createUser)
 
-//ADMIN ROUTES
-userRouter.use(validateAdmin);
-userRouter.post("/reset", UsersController.resetUser);
-userRouter.post("/owned_cards/add", UsersController.addCardToUserOwnedCards);
-
-export default userRouter;
+export default usersRouter

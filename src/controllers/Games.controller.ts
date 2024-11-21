@@ -1,193 +1,132 @@
-import { Request, Response } from "express";
-import { CallbackError, Error, startSession } from "mongoose";
-import AnimalCard from "../models/AnimalCard";
-import PlantCard from "../models/PlantCard";
-import User from "../models/User";
-import { GameModel as Game } from "../models/Game";
-import { defaultOkResponse, responseHandler } from "../utils/defaultResponses";
-import { CAMPAIGN_GAMES, CAMPAIGN_REWARDS } from "../utils/constants";
-import log from "../utils/logger";
-import { IAnimal, IGame } from "../interfaces";
-import { getTimeStamp } from "../utils";
+import { Request, Response } from 'express'
+import { animalsBaseQuery, AnimalsController } from './Animals.controller'
+import { PlantsController } from './Plants.controller'
+import { HabitatsController } from './Habitats.controller'
+import { respondError } from '../utils/defaultResponses'
+import Game, { FinishedGame } from '../models/Game'
+import { CampaignLevelsController } from './CampaignLevels.controller'
+import { CampaignsController } from './Campaigns.controller'
+import { ERROR_CODES } from '../utils/constants'
+import knex from '..'
+import CampaignLevel from '../models/CampaignLevel'
+import Campaign from '../models/Campaign'
 
 export class GamesController {
-  static async getRandomGame(req: Request, res: Response) {
-    AnimalCard.aggregate([{ $sample: { size: 10 } }]).exec(
-      (animalsErr: CallbackError, animalsDocs: Document[]) => {
-        if (animalsErr)
-          return log.error(
-            "Error getting random initial hands",
-            JSON.stringify(animalsErr)
-          );
+  static async random(req: Request, res: Response): Promise<void> {
+    try {
+      const animals = await AnimalsController.getRandomAnimals(req, res)
+      const plants = await PlantsController.getRandomPlants(req, res)
+      const habitats = await HabitatsController.getRandomHabitats(req, res)
+      const habitat = habitats[0]
 
-        PlantCard.aggregate([{ $sample: { size: 6 } }]).exec(
-          (plantsErr: CallbackError, plantsDocs: Document[]) => {
-            if (plantsErr)
-              return log.error(
-                "Error getting random initial plants",
-                JSON.stringify(plantsErr)
-              );
-            const response = {
-              user: {
-                animals: animalsDocs.slice(0, 5),
-                plants: plantsDocs.slice(0, 3),
-              },
-              pc: {
-                animals: animalsDocs.slice(5),
-                plants: plantsDocs.slice(3),
-              },
-            };
-            defaultOkResponse(res, response);
-          }
-        );
-      }
-    );
-  }
-
-  static async getNewCampaign(req: Request, res: Response) {
-    const { xp, user_cards }: { xp: number; user_cards: string[] } = req.body;
-    PlantCard.aggregate([{ $sample: { size: 6 } }]).exec(
-      (plantsErr: Error, plantsDocs: Document[]) => {
-        if (plantsErr)
-          return log.error(
-            "Error getting random initial plants",
-            JSON.stringify(plantsErr)
-          );
-        const pcFilteredAnimals = CAMPAIGN_GAMES[xp]
-          .filter((animal: string) => !user_cards.includes(animal))
-          .slice(0, 5);
-
-        AnimalCard.find({
-          name: { $in: pcFilteredAnimals },
-        }).exec((pcAnimalsErr: CallbackError, pcAnimals: IAnimal[]) => {
-          if (pcAnimalsErr)
-            return log.error(
-              "Error getting pc initial hand for campaign",
-              JSON.stringify(pcAnimalsErr)
-            );
-          AnimalCard.find({
-            name: { $in: user_cards },
-          }).exec((userAnimalsErr: CallbackError, userAnimals: IAnimal[]) => {
-            if (userAnimalsErr)
-              return log.error(
-                "Error getting pc initial hand for campaign",
-                JSON.stringify(userAnimalsErr)
-              );
-            const response = {
-              user: {
-                animals: userAnimals,
-                plants: plantsDocs.slice(0, 3),
-              },
-              pc: {
-                animals: pcAnimals,
-                plants: plantsDocs.slice(3),
-              },
-            };
-            defaultOkResponse(res, response);
-          });
-        });
-      }
-    );
-  }
-
-  static async saveGame(req: Request, res: Response) {
-    const { game, auth_id, current_xp, required_xp } = req.body;
-    const { used_animals, used_plants, won } = game;
-    const firstTimeWon = won && current_xp === required_xp;
-    const earned_xp: number = firstTimeWon ? CAMPAIGN_REWARDS[current_xp].xp : 0;
-    const earned_coins: number = won ? CAMPAIGN_REWARDS[current_xp].coins : 1;
-    const earned_animal: string | null = firstTimeWon
-      ? CAMPAIGN_REWARDS[current_xp].animal
-      : null;
-
-    if (auth_id && used_animals && used_plants) {
-      const session = await startSession();
-      try {
-        let transactionResult = null;
-        const transaction = await session.withTransaction(async () => {
-          const abort = async (message: string) => {
-            await session.abortTransaction();
-            log.error(message);
-            return;
-          };
-          try {
-            await Game.updateOne(
-              { auth_id },
-              { $push: { games: { ...game, earned_xp, created_at: getTimeStamp() } } },
-              { new: true, session, upsert: true }
-            );
-
-            const user = await User.findOne({ auth_id }).select("owned_cards");
-            if (!user) throw new Error("User does not exist");
-            const isCardOwned =
-              earned_animal && user?.owned_cards.includes(earned_animal);
-            const updatedUser = await User.findOneAndUpdate(
-              { auth_id },
-              {
-                $inc: { coins: earned_coins, xp: earned_xp },
-                ...(earned_animal && !isCardOwned
-                  ? { $push: { owned_cards: earned_animal } }
-                  : {}),
-              },
-              { new: true, session }
-            );
-            transactionResult = {
-              current_xp: updatedUser?.xp,
-              earned_animal,
-              earned_coins,
-              current_coins: updatedUser?.coins,
-            };
-          } catch (e) {
-            return abort(`Error saving last game ${JSON.stringify(e)}`);
-          }
-        });
-
-        if (transaction && transactionResult) {
-          res.status(200).send(transactionResult);
-        } else {
-          log.error(`Transaction intentionally aborted`);
-          res.status(500).send(`Transaction intentionally aborted. See error log`);
+      const newGame: Game = {
+        habitat,
+        user: {
+          animals: animals.slice(0, 5),
+          plants: plants.slice(0, 3)
+        },
+        pc: {
+          animals: animals.slice(5),
+          plants: plants.slice(3)
         }
-      } catch (e) {
-        log.error(`Transaction aborted due to an unexpected error: ${e}`);
-        res.status(500).send(e);
-      } finally {
-        await session.endSession();
       }
-    } else res.status(400).send("Not all required arguments were sent");
+
+      res.status(200).send(newGame)
+    } catch (e) {
+      respondError(res, 'Error getting random game', JSON.stringify(e))
+    }
   }
 
-  static async getLastGames(req: Request, res: Response) {
-    const { auth_id } = req.body;
-    const quantity: string | undefined = req.query.quantity?.toString();
-    const docsNumber = quantity ? parseInt(quantity) : 20;
-    Game.aggregate([
-      {
-        $match: {
-          auth_id,
+  static async campaign(req: Request, res: Response): Promise<void> {
+    const { level, user_id } = req.body
+    try {
+      const userCampaign = await CampaignsController.getCampaignByUserId(user_id)
+      if (!userCampaign) return respondError(res, 'Campaign not found', null, ERROR_CODES.NOT_FOUND)
+      if (userCampaign.level < level)
+        return respondError(res, `Campaign level ${level} cannot be played by user`, null, ERROR_CODES.BAD_REQUEST)
+      const campaignLevel = await CampaignLevelsController.getCampaignLevelByLevel(level)
+      const userAnimals = userCampaign.owned_animals.filter(animal => animal.is_in_hand)
+      const pcHandIds = campaignLevel.pc_animal_ids
+        .filter(pcAnimalId => !userAnimals.find(userAnimal => userAnimal.id === pcAnimalId))
+        .slice(0, 5)
+      const pcAnimals = await AnimalsController.getAnimalsByIds(pcHandIds)
+      const plants = await PlantsController.getRandomPlants(req, res)
+      const habitat = await HabitatsController.getHabitatById(campaignLevel.habitat_id)
+
+      const newGame: Game = {
+        habitat,
+        user: {
+          animals: userAnimals,
+          plants: plants.slice(0, 3)
         },
-      },
-      { $unwind: "$games" },
-      {
-        $sort: {
-          "games.created_at": -1,
-        },
-      },
-      {
-        $group: {
-          _id: "$_id",
-          games: {
-            $push: "$games",
-          },
-        },
-      },
-    ]).exec((err: CallbackError, docs: IGame[]) => {
-      responseHandler(
-        res,
-        err,
-        docs.length > 0 ? docs[0].games.slice(0, docsNumber) : [],
-        "Error getting last games"
-      );
-    });
+        pc: {
+          animals: pcAnimals,
+          plants: plants.slice(3)
+        }
+      }
+
+      res.status(200).send(newGame)
+    } catch (e) {
+      respondError(res, `Error getting campaign game for level ${level}`, JSON.stringify(e))
+    }
+  }
+
+  static async saveGame(req: Request, res: Response): Promise<void> {
+    const { user_id, game, level } = req.body
+    try {
+      // TODO: SIMPLIFY THIS OR USE A TRANSACTION
+      await knex<FinishedGame>('finished_games').insert({
+        user_id,
+        user_won: game.user_won,
+        habitat_id: game.habitat_id,
+        habitat_name: game.habitat_name,
+        pc_used_animals: game.pc_used_animals,
+        user_used_animals: game.user_used_animals,
+        pc_used_plants: game.pc_used_plants,
+        user_used_plants: game.user_used_plants,
+        created_at: new Date().toISOString()
+      })
+      const campaignLevel = await knex<CampaignLevel>('campaign_levels').where('level_required', level).first()
+      if (!campaignLevel)
+        return respondError(res, `Campaign level ${level} cannot be retrieved`, null, ERROR_CODES.NOT_FOUND)
+      const [updatedCampaign] = await knex('campaigns')
+        .where('user_id', user_id)
+        .increment({
+          coins: campaignLevel.coins_reward,
+          level: 1
+        })
+        .returning('*')
+      if (!campaignLevel.animal_id_reward) {
+        res.status(200).send({
+          earned_animal: null,
+          new_level: updatedCampaign.level,
+          current_coins: updatedCampaign.coins,
+          earned_coins: campaignLevel.coins_reward
+        })
+      } else {
+        const earned_animal = animalsBaseQuery().where('animals.id', campaignLevel.animal_id_reward).first()
+        res.status(200).send({
+          earned_animal,
+          new_level: updatedCampaign.level,
+          current_coins: updatedCampaign.coins,
+          earned_coins: campaignLevel.coins_reward
+        })
+      }
+    } catch (e) {
+      respondError(res, `Error saving game ${user_id ? `for user ${user_id}` : ''}`, JSON.stringify(e))
+    }
+  }
+
+  static async getGamesHistory(req: Request, res: Response): Promise<void> {
+    const { user_id } = req.params
+    try {
+      if (!user_id) return respondError(res, `Missing params`, null, ERROR_CODES.BAD_REQUEST)
+      const last_games = await knex<FinishedGame>('finished_games').where('user_id', user_id)
+      res.status(200).send({
+        last_games
+      })
+    } catch (e) {
+      respondError(res, `Error getting games history for user ${user_id}`, JSON.stringify(e))
+    }
   }
 }

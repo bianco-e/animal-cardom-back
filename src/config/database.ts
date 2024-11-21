@@ -1,7 +1,9 @@
-import dotenv from "dotenv";
-dotenv.config();
-const MONGO_DB_PASSWORD = process.env.MONGO_DB_PASSWORD;
-const MONGO_DB_USER = process.env.MONGO_DB_USER;
-const DATABASE_NAME = process.env.DATABASE_NAME;
+import dotenv from 'dotenv'
+dotenv.config()
 
-export default `mongodb+srv://${MONGO_DB_USER}:${MONGO_DB_PASSWORD}@cluster0.cv5ri.mongodb.net/${DATABASE_NAME}?retryWrites=true&w=majority`;
+const DB_HOST = process.env.ANIMAL_CARDOM_DB_HOST
+const DB_USER = process.env.ANIMAL_CARDOM_DB_USER
+const DB_PASSWORD = process.env.ANIMAL_CARDOM_DB_PASSWORD
+const DB_NAME = process.env.ANIMAL_CARDOM_DB_NAME
+
+export { DB_HOST, DB_NAME, DB_PASSWORD, DB_USER }

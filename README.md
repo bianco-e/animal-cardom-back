@@ -1,129 +1,91 @@
 # Animal Cardom API
 
-## Routes
+## Endpoints
 
 ### Animals
 
-- GET `/animals/all` - Returns an array with all existing animals
+- GET `/animals/` - Returns an array with all existing animals. Filters can apply using query params: `species_id`, `habitat_id`, `price`, `skill_use_type_id`, `sort_by`, `order`, `limit`
 
-- GET `/animals/{NAME}` - Returns a single animal by NAME
+- GET `/animals/:id` - Returns a single animal by ID
 
-- GET `/animals/all/statistics` - Returns an object with all existing animals statistics, total quantity, quantity by species, etc.
-
-- GET `/animals/newest` - Returns an array with the newest 3 animals
-
-- GET `/animals/filter` - Returns an array with all existing animals filtered by `species`, `skill_type` and `owned` params
-
-- POST `/animals/create` - Creates a new animal card
+- POST `/animals` - Creates a new animal
 
 ```
 Receives an object with the structure of an animal as body
 ```
 
-- POST `/animals/create-many` - Creates many new animals cards
+### Plants
+
+- GET `/plants` - Returns an array with all existing plants. Filters can apply using query params: `use_type_id`, `sort_by`, `order`, `limit`
+
+- GET `/plants/:id` - Returns a single plant by ID
+
+- POST `/plants` - Creates a new plant
 
 ```
-Receives an array of objects with the structure of an animal as body
+Receives an object with the structure of a plant as body
 ```
 
-### Feedback
+### Habitats
 
-- POST `/feedback/give` - Creates a new feedback message
+- GET `/habitats` - Returns an array with all existing habitats
+
+- GET `/habitats/:id` - Returns a single habitat by ID
+
+- POST `/habitats` - Creates a new habitat
 
 ```
-Receives an object with name (optional) and message properties as body
+Receives an array of objects with the structure of a habitat as body
 ```
 
 ### Games
 
-- GET `/games/new-random` - Returns an object with user and pc properties, where each one has an array of random animals and an array of random plants
-
-- POST `/games/new-campaign` - Returns an object with user and pc properties, where each one has an array of animals and an array of plants according to `xp` (which identifies the current level) and `user_cards` (which makes not to return a repeated animal) params
-
-- POST `/games/save-game` - Saves last campaign game
-
-```
-Receives an object with auth_id and game (contains last game data) properties as body
-```
-
-- POST `/games/last-games` - Returns last 10 games for specified user
-
-```
-Receives an object with auth_id property as body
-```
-
-### Plants
-
-- GET `/plants/all` - Returns an array with all existing plants
-
-- POST `/plants/create` - Creates a new plant card
-
-```
-Receives an object with the structure of an plant as body
-```
-
-- POST `/plants/create-many` - Creates many new plants cards
-
-```
-Receives an array of objects with the structure of an plant as body
-```
-
-### Terrains
-
-- GET `/terrains/all` - Returns an array with all existing terrains
-
-- GET `/terrains/new` - Returns a random terrain
-
-- GET `/terrains/new?xp={XP}` - Returns the terrain associated to current xp for campaign
-
-- POST `/terrains/create-many` - Creates many new terrains
-
-```
-Receives an array of objects with the structure of a terrain as body
-```
-
-### Tracking
-
-- POST `/tracking/track_action` - Saves action to track
-
-```
-Receives an object with auth_id (optional), utm (optional), guest_name (optional), and action properties as body
-```
+- GET `/games` - Returns a random habitat and an object with user and pc properties, where each one has an array of random animals and an array of random plants
 
 ### Users
 
-- POST `/users/create` - Creates new user
+- POST `/users/me` - Returns user data
 
 ```
-Receives an object with user structure as body
+Receives an object with email property as body
 ```
 
-- POST `/users/me` - Returns all user data
+- POST `/users` - Creates new user
 
 ```
-Receives an object with auth_id property as body
+Receives an object with google user structure as body
 ```
 
-- POST `/users/profile` - Returns user profile related to the game without personal data
+### Campaigns
+
+- GET `/campaigns` - Returns an array with all existing campaigns. Filters can apply using query params: `user_id`, `sort_by`, `order`, `limit`
+
+- GET `/campaigns/:id` - Returns a single campaign by ID
+
+- POST `/campaigns` - Creates a new campaign
 
 ```
-Receives an object with auth_id property as body
+Receives user_id as body
 ```
 
-- POST `/users/hand/update` - Updates user current hand
+### CampaignAnimals
+
+- POST `/campaign_animals` -  Adds new card to user owned cards, and substract card price from coins
 
 ```
-Receives an object with auth_id and hand (array of strings) properties as body
+Receives an object with animal_id and campaign_id properties as body
 ```
 
-- POST `/users/owned_cards/add` - Adds new card to user owned cards
+- PUT `/campaign_animals` -  Updates user current hand
 
 ```
-Receives an object with auth_id and new_card (string) properties as body
+Receives an object with campaign_id, old_hand (animal_id list) and new_hand (animal_id list) as body
 ```
 
-- POST `/users/animal_purchase` - Adds new card to user owned cards, and substract card price from user coins
+### Feedback
+
+- POST `/feedback` - Creates a new feedback message
 
 ```
-Receives an object with auth_id, price and new_card (string) properties as body
+Receives an object with name (optional) and message properties as body
 ```

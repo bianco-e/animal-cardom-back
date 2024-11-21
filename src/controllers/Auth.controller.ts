@@ -1,44 +1,46 @@
-import { Request, Response } from "express";
-import { CallbackError } from "mongoose";
-import { IUser } from "../interfaces";
-import User from "../models/User";
-import { defaultErrorResponse, responseHandler } from "../utils/defaultResponses";
-import jwt from "jsonwebtoken";
-import { getBearer } from "../utils";
+import { Request, Response } from 'express'
+import User from '../models/User'
+import { respondError } from '../utils/defaultResponses'
+import jwt from 'jsonwebtoken'
+import { getBearer } from '../utils'
+import knex from '../index'
+import { ERROR_CODES } from '../utils/constants'
+import { createToken } from './utils'
 
-const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_SECRET = process.env.JWT_SECRET
 
 export class AuthController {
-  static async login(req: Request, res: Response) {
-    if (!JWT_SECRET) return;
-    const { auth_id, email } = req.body;
-    if (!auth_id || !email)
-      return defaultErrorResponse(res, "missing_params", "No params received");
-    User.findOne({ auth_id, email }, (err: CallbackError, user: IUser | null) => {
-      if (!user) return defaultErrorResponse(res, "no_user", "User does not match db");
-      const token = jwt.sign({ email, role: user.role }, JWT_SECRET, {
-        expiresIn: 21600, //6h
-      });
-      responseHandler(
-        res,
-        err,
-        { token, user },
-        "User does not match db",
-        "Received values do not match our db"
-      );
-    });
+  static async login(req: Request, res: Response): Promise<void> {
+    const { email } = req.body
+    try {
+      if (!JWT_SECRET) throw new Error('Internal error')
+      if (!email) return respondError(res, `Missing params`, null, ERROR_CODES.BAD_REQUEST)
+      const user = await knex<User>('users').where('email', email).first()
+      if (!user) return respondError(res, `Not able to log in user`, null, ERROR_CODES.UNAUTHORIZED)
+      const token = createToken({ email: user.email, role_id: user.role_id })
+      res.status(200).send({
+        token,
+        user
+      })
+    } catch (e) {
+      respondError(res, `Error logging user: ${email}`, JSON.stringify(e))
+    }
   }
 
-  static async checkToken(req: Request, res: Response) {
-    if (!JWT_SECRET) return;
-    const token = getBearer(req.headers.authorization);
-    if (!token) return res.status(401).send({ error: "Unauthorized - NT" });
-    jwt.verify(token, JWT_SECRET, (err: any, decoded: any) => {
-      if (err) return res.status(401).send({ ...err });
-      res.json({
-        expires: decoded.exp,
-        is_valid: true,
-      });
-    });
+  static async checkToken(req: Request, res: Response): Promise<void> {
+    try {
+      if (!JWT_SECRET) throw new Error('Internal error')
+      const token = getBearer(req.headers.authorization)
+      if (!token) return respondError(res, `Token does not exist`, null, ERROR_CODES.UNAUTHORIZED)
+      jwt.verify(token, JWT_SECRET, (err: any, decoded: any) => {
+        if (err) return respondError(res, `Invalid token`, null, ERROR_CODES.UNAUTHORIZED)
+        res.status(200).send({
+          expires: decoded.exp,
+          is_valid: true
+        })
+      })
+    } catch (e) {
+      respondError(res, `Error checking user token`, JSON.stringify(e))
+    }
   }
 }

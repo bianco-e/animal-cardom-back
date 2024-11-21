@@ -1,21 +1,27 @@
-import actionsRoutes from "./actions";
-import animalsRoutes from "./animals";
-import feedbackRoutes from "./feedback";
-import gamesRoutes from "./games";
-import plantsRoutes from "./plants";
-import terrainsRoutes from "./terrains";
-import usersRoutes from "./users";
-import authRoutes from "./auth";
-import { Router } from "express";
+import animalsRoutes from './animals'
+import authRoutes from './auth'
+import plantsRoutes from './plants'
+import habitatsRoutes from './habitats'
+import gamesRoutes from './games'
+import campaignsRoutes from './campaigns'
+import campaignAnimalsRoutes from './campaignAnimals'
+import campaignLevelsRoutes from './campaignLevels'
+import usersRoutes from './users'
+import speciesRoutes from './species'
+import skillTypesRoutes from './skillTypes'
+import { Router } from 'express'
 
-const router: Router = Router();
-router.use("/animals", animalsRoutes);
-router.use("/auth", authRoutes);
-router.use("/feedback", feedbackRoutes);
-router.use("/games", gamesRoutes);
-router.use("/plants", plantsRoutes);
-router.use("/terrains", terrainsRoutes);
-router.use("/actions", actionsRoutes);
-router.use("/users", usersRoutes);
+const router: Router = Router()
+router.use('/animals', animalsRoutes)
+router.use('/auth', authRoutes)
+router.use('/plants', plantsRoutes)
+router.use('/habitats', habitatsRoutes)
+router.use('/games', gamesRoutes)
+router.use('/campaigns', campaignsRoutes)
+router.use('/campaign_animals', campaignAnimalsRoutes)
+router.use('/campaign_levels', campaignLevelsRoutes)
+router.use('/users', usersRoutes)
+router.use('/species', speciesRoutes)
+router.use('/skill_types', skillTypesRoutes)
 
-export default router;
+export default router
